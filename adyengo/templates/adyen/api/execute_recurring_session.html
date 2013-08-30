@@ -1,0 +1,29 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <h2>Recurring Payment session</h2>
+
+    <h3>Result:</h3>
+    <table>
+        <tr>
+            <th>PSP Reference</th>
+            <td>{{ result.psp_reference }}</td>
+        </tr>
+        <tr>
+            <th>Result code</th>
+            <td>{{ result.result_code }}</td>
+        </tr>
+        <tr>
+            <th>Auth code</th>
+            <td>{{ result.auth_code }}</td>
+        </tr>
+        {% if result.is_refused %}
+            <tr>
+                <th>Refusal reason</th>
+                <td>{{ result.refusal_reason }}</td>
+            </tr>
+        {% endif %}
+    </table>
+
+{% endblock %}

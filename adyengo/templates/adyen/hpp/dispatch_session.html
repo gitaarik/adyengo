@@ -1,0 +1,31 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <form method="POST" action="{{ url }}">
+
+        <h2>Post to:</h2>
+        {{ url }}
+
+        <h2>Fields:</h2>
+
+        <table>
+            {% for name, value in params.iteritems %}
+                <tr>
+                    <th>{{ name }}</th>
+                    <td>
+                        {{ value }}
+                        <input type="hidden" name="{{ name }}" value="{{ value }}" />
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Signature:</h2>
+
+
+        <input type="submit" value="Dispatch">
+
+    </form>
+
+{% endblock %}

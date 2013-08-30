@@ -1,0 +1,165 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <style>
+
+        .post-to-list {
+            overflow: hidden;
+        }
+
+        .post-to-list li {
+            float: left;
+            margin-right: 10px;
+            background: #EEE;
+            padding: 5px;
+            border: solid 1px #000;
+            cursor: pointer;
+        }
+
+        .post-to-list li.selected {
+            background: #FFF;
+        }
+
+        .fields th {
+            width: 210px;
+        }
+
+        .allowed_methods {
+            padding-right: 50px;
+        }
+
+    </style>
+
+    <script>
+
+        window.onload = function() {
+
+            var select = document.getElementsByTagName('select')[0]
+
+            select.onchange = function() {
+                var option = select.children[select.selectedIndex].value
+                window.location = document.URL.replace(
+                    /\/hpp\/setup_session\/([^\/]+\/)?$/,
+                    '/hpp/setup_session/' + option + '/'
+                )
+            }
+
+        }
+
+    </script>
+
+    <form method="POST" action="{{ dispatch_url }}">
+
+        {% csrf_token %}
+
+        <h2>Type:</h2>
+        <select name="session_type">
+            <option value="{{ session_type_hpp_regular }}" {% if session_type_hpp_regular == session_type %} selected="selected"{% endif %}>Regular</option>
+            <option value="{{ session_type_hpp_recurring }}" {% if session_type_hpp_recurring == session_type %} selected="selected"{% endif %}>Recurring</option>
+        </select>
+
+        <h2>Page flow:</h2>
+        <ul>
+            <li><label><input type="radio" name="page_type" value="multiple" checked="checked">Multiple pages</label></li>
+            <li><label><input type="radio" name="page_type" value="single">Single page (doesn't work for mobile skins)</label></li>
+            <li><label><input type="radio" name="page_type" value="skip">Skip page flow (need to supply exactly one payment method)</label></li>
+        </ul>
+
+        <h2>Fields:</h2>
+
+        <table class="fields">
+            <tr>
+                <th>Merchant reference</th>
+                <td><input type="text" name="merchant_reference" value="{{ params.merchant_reference }}" /></td>
+            </tr>
+            <tr>
+                <th>Payment amount</th>
+                <td><input type="text" name="payment_amount" value="{{ params.payment_amount }}" /></td>
+            </tr>
+            <tr>
+                <th>Currency</th>
+                <td>
+                    {% for key, value in currency_codes.items %}
+                        <select name="currency_code">
+                            <option value="{{ key }}"{% if params.currency_code == key %} selected="selected"{% endif %}>{{ value }}</option>
+                        </select>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <th>Ship before date</th>
+                <td><input type="text" name="ship_before_date" value="{{ params.ship_before_date }}" /></td>
+            </tr>
+            <tr>
+                <th>Skin code</th>
+                <td><input type="text" name="skin_code" value="{{ params.skin_code }}" /></td>
+            </tr>
+            <tr>
+                <th>Session validity</th>
+                <td><input type="text" name="session_validity" value="{{ params.session_validity }}" /></td>
+            </tr>
+            <tr>
+                <th>
+                    Shopper reference
+                    {% if session_type == session_type_hpp_regular %}(optional){% endif %}
+                </th>
+                <td>
+                    <input type="text" name="shopper_reference" value="{% if session_type == session_type_hpp_recurring %}{{ params.shopper_reference }}{% endif %}" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Shopper email
+                    {% if session_type == session_type_hpp_regular %}(optional){% endif %}
+                </th>
+                <td><input type="text" name="shopper_email" value="{% if session_type == session_type_hpp_recurring %}shopper@example.com{% endif %}" /></td>
+            </tr>
+        </table>
+
+        {% if session_type == session_type_hpp_recurring %}
+
+            <h2>Recurring Contract Type</h2>
+
+            <ul>
+                {% for key, value in recurring_contract_types.items %}
+                    <li><label><input type="radio" name="recurring_contract" value="{{ key }}"> {{ value }}</label></li>
+                {% endfor %}
+            </ul>
+
+        {% endif %}
+
+        <table>
+            <tr>
+                <td class="allowed_methods">
+
+                    <h2>Allowed payment methods:</h2>
+                    <p>If no selection is made, all methods will be allowed.</p>
+
+                    <ul>
+                        {% for key, value in payment_methods.iteritems %}
+                            <li><label><input type="checkbox" name="allowed_payment_methods" value="{{ key }}"> {{ value }}</label></li>
+                        {% endfor %}
+                    </ul>
+
+                </td>
+                <td>
+
+                    <h2>Blocked payment methods:</h2>
+                    <p>The user won't be allowed to pay with these methods.</p>
+
+                    <ul>
+                        {% for key, value in payment_methods.iteritems %}
+                            <li><label><input type="checkbox" name="blocked_payment_methods" value="{{ key }}"> {{ value }}</label></li>
+                        {% endfor %}
+                    </ul>
+
+                </td>
+            </tr>
+        </table>
+
+        <input type="submit" value="Set up">
+
+    </form>
+
+{% endblock %}

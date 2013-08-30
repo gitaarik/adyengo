@@ -1,0 +1,44 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <h2>Request recurring contracts</h2>
+
+    {% for contract in contracts %}
+
+        <table>
+            <tr>
+                <th>Recurring detail reference</th>
+                <td>{{ contract.recurring_detail_reference }}</td>
+            </tr>
+            <tr>
+                <th>Variant</th>
+                <td>{{ contract.variant }}</td>
+            </tr>
+            <tr>
+                <th>Creation date</th>
+                <td>{{ contract.creation_date }}</td>
+            </tr>
+            <tr>
+                <th>Payment method type</th>
+                <td>{{ contract.payment_method_type }}</td>
+            </tr>
+            <tr>
+                <td colspan="2"><h3>Details:</h3></td>
+            </tr>
+
+            {% for key, value in contract.details_dict.items %}
+                <tr>
+                    <th>{{ key }}</th>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if not forloop.last %}
+            <hr>
+        {% endif %}
+
+    {% endfor %}
+
+{% endblock %}

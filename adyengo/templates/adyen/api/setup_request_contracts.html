@@ -1,0 +1,31 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <h2>Request recurring contracts</h2>
+
+    <form method="POST" action="{{ execute_url }}">
+
+        {% csrf_token %}
+
+        <table>
+            <tr>
+                <th>Shopper reference</th>
+                <td><input type="text" name="shopper_reference"></td>
+            </tr>
+            <tr>
+                <th>Recurring contract</th>
+                <td>
+                    <ul>
+                        <li><label><input type="radio" name="contract_type" value="ONECLICK"> One click</label></li>
+                        <li><label><input type="radio" name="contract_type" value="RECURRING"> Recurring</label></li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <input type="submit" value="Execute">
+
+    </form>
+
+{% endblock %}

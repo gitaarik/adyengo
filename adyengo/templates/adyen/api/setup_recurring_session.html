@@ -1,0 +1,68 @@
+{% extends "adyen/base.html" %}
+
+{% block content %}
+
+    <h2>Recurring Payment session</h2>
+
+    <form method="POST" action="{{ execute_url }}">
+
+        {% csrf_token %}
+
+        <table>
+            <tr>
+                <th>Merchant reference</th>
+                <td><input type="text" name="merchant_reference" value="{{ params.merchant_reference }}" /></td>
+            </tr>
+            <tr>
+                <th>Recurring Contract Detail reference</th>
+                <td><input type="text" name="recurring_detail_reference" value="{{ params.recurring_detail_reference }}" /></td>
+            </tr>
+            <tr>
+                <th>Payment amount</th>
+                <td><input type="text" name="payment_amount" value="{{ params.payment_amount }}" /></td>
+            </tr>
+            <tr>
+                <th>Currency</th>
+                <td>
+                    {% for key, value in currency_codes.items %}
+                        <select name="currency_code">
+                            <option value="{{ key }}"{% if params.currency_code == key %} selected="selected"{% endif %}>{{ value }}</option>
+                        </select>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <th>Shopper reference</th>
+                <td><input type="text" name="shopper_reference" value="" /></td>
+            </tr>
+            <tr>
+                <th>Shopper email</th>
+                <td><input type="text" name="shopper_email" value="shopper@example.com" /></td>
+            </tr>
+            <tr>
+                <th>Fraud offset (optional)</th>
+                <td><input type="text" name="fraud_offset" value="" /></td>
+            </tr>
+            <tr>
+                <th>Shopper IP (optional)</th>
+                <td><input type="text" name="shopper_ip" value="" /></td>
+            </tr>
+            <tr>
+                <th>Shopper statement (optional)</th>
+                <td><input type="text" name="shopper_statement" value="" /></td>
+            </tr>
+        </table>
+
+        <h2>Recurring Contract Type</h2>
+
+        <ul>
+            {% for key, value in recurring_contract_types.items %}
+                <li><label><input type="radio" name="recurring_contract" value="{{ key }}"> {{ value }}</label></li>
+            {% endfor %}
+        </ul>
+
+        <input type="submit" value="Execute">
+
+    </form>
+
+{% endblock %}
