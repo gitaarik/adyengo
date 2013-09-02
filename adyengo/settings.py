@@ -1,5 +1,6 @@
 from django.conf import settings
 
+# Your Adyen merchant account
 MERCHANT_ACCOUNT = getattr(settings, 'ADYEN_MERCHANT_ACCOUNT')
 
 # The shared secret used to validate the communication with Adyen
@@ -12,13 +13,14 @@ MODE = getattr(settings, 'ADYEN_MODE', 'test')
 # system expects that the skin code will be provided when creating the session.
 DEFAULT_SKIN_CODE = getattr(settings, 'ADYEN_DEFAULT_SKIN_CODE', None)
 
-# The default currency code. This option isn't required, but if it's not set, the
-# system expects that the skin code will be provided when creating the session.
+# The default currency code. This option isn't required, but if it's not set,
+# the system expects that the currency code will be provided when creating the
+# session.
 DEFAULT_CURRENCY_CODE = getattr(settings, 'ADYEN_DEFAULT_CURRENCY_CODE', None)
 
-WEB_SERVICES_USERNAME = getattr(settings, 'ADYEN_WEB_SERVICES_USERNAME')
-WEB_SERVICES_PASSWORD = getattr(settings, 'ADYEN_WEB_SERVICES_PASSWORD')
-WEB_SERVICES_PUBLIC_KEY = getattr(settings, 'ADYEN_WEB_SERVICES_PUBLIC_KEY')
+WEB_SERVICES_USERNAME = getattr(settings, 'ADYEN_WEB_SERVICES_USERNAME', None)
+WEB_SERVICES_PASSWORD = getattr(settings, 'ADYEN_WEB_SERVICES_PASSWORD', None)
+WEB_SERVICES_PUBLIC_KEY = getattr(settings, 'ADYEN_WEB_SERVICES_PUBLIC_KEY', None)
 
 if MODE == 'test':
     PAYMENT_PAGES_MULTIPLE_URL = 'https://test.adyen.com/hpp/select.shtml'
