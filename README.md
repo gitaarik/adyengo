@@ -143,7 +143,7 @@ model. To get the url the form should post to, use the `url()` method.
 
 ##### Example
 
-*view.py*
+**view.py**
 
     from django.shortcuts import render
     from adyengo.models import Session
@@ -175,7 +175,7 @@ model. To get the url the form should post to, use the `url()` method.
             'params': params
         })
 
-*forward.html*
+**forward.html**
 
     <form method="POST" action="{{ url }}">
         {% for var, value in params.items %}
