@@ -185,5 +185,5 @@ model. To get the url the form should post to, use the `url()` method.
     </form>
 
     <script>
-        document.forms[0].submit()
+        document.forms[0].submit() // automatically submit the form
     </script>
