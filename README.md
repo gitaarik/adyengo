@@ -76,9 +76,10 @@ field in the `Session` model is a Adyen specific field it will be pointed out.
 In this case you can get more information about the field in the Adyen
 Integration Manual.
 
-Besides that, the `Session` model has some other fields for internal logic.
-The most important one is the `session_type` field. This field decices what
-kind of payment the session represents.
+Besides the Adyen specific fields, the `Session` model has some Adyengo
+specific fields for internal logic. The most important one is the
+`session_type` field. This field decices what kind of payment the session
+represents.
 
 The choices for this field are defined in the `constants.py` which you can
 import using `from adyengo import constants`. Then you can choose one of the
