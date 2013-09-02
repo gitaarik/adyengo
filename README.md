@@ -65,6 +65,8 @@ Adyengo is reflects Adyen's interface in regular Django models and managers.
 The main model to setup a payment is the `Session` model. Depending on what
 kind of payment, you fill the fields of the `Session` model.
 
+#### The `Session` model
+
 Most of the fields in the `Session` model reflect a field in the Adyen
 interface. The only difference is that Adyen uses camelCase and Adyengo uses
 under\_scores. So a field in the Adyen interface like `merchantReference` will
