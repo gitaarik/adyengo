@@ -78,7 +78,7 @@ Integration Manual.
 
 Besides the Adyen specific fields, the `Session` model has some Adyengo
 specific fields for internal logic. The most important one is the
-`session_type` field. This field decices what kind of payment the session
+`session_type` field. This field decides what kind of payment the session
 represents.
 
 The choices for this field are defined in the `constants.py` which you can
