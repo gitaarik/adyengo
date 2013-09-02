@@ -90,10 +90,10 @@ class Session(models.Model):
             'merchantReference': self.merchant_reference,
             'paymentAmount': self.payment_amount,
             'currencyCode': self.currency_code,
-            'shipBeforeDate': self.ship_before_date,
+            'shipBeforeDate': self.ship_before_date.isoformat(),
             'skinCode': self.skin_code,
             'merchantAccount': settings.MERCHANT_ACCOUNT,
-            'sessionValidity': self.session_validity,
+            'sessionValidity': self.session_validity.isoformat(),
         }
 
         if self.shopper_locale:

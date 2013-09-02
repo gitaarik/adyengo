@@ -1,4 +1,5 @@
 import uuid
+import dateutil.parser
 
 from django.shortcuts import render
 from django.utils import timezone
@@ -15,7 +16,7 @@ def hpp_setup_session(request, session_type):
     if not session_type:
         session_type = constants.SESSION_TYPE_HPP_REGULAR
 
-    tomorrow = (timezone.now() + timezone.timedelta(days=1)).isoformat()
+    tomorrow = (timezone.now() + timezone.timedelta(days=1))
 
     params = {
         'merchant_reference': uuid.uuid4(),
@@ -50,9 +51,9 @@ def hpp_dispatch_session(request):
         merchant_reference=p('merchant_reference'),
         payment_amount=p('payment_amount'),
         currency_code=p('currency_code'),
-        ship_before_date=p('ship_before_date'),
+        ship_before_date=dateutil.parser.parse(p('ship_before_date')),
         skin_code=p('skin_code'),
-        session_validity=p('session_validity'),
+        session_validity=dateutil.parser.parse(p('session_validity')),
         shopper_reference=p('shopper_reference'),
         shopper_email=p('shopper_email'),
         recurring_contract=p('recurring_contract'),

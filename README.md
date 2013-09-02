@@ -26,7 +26,7 @@ If you want to contribute, you're very welcome. Contact me for any questions.
 ## Installation
 
 I haven't made a pip install for it yet, so you'll have to manually add it to
-your project.
+your project. Don't forget to install the requirements in `requirements.txt`.
 
 
 ## Implementation
@@ -105,11 +105,13 @@ fields:
 * `currency_code` - The currency code for the currency the amount is in.
     Choices are listed in the constants starting with `CURRENCY_CODE_`, for
     example `CURRENCY_CODE_EUR` for Euro.
-* `ship_before_date` - The date the product should be shipped, in ISO format.
+* `ship_before_date` - The date the product should be shipped, provide as a
+    Python date object.
 * `skin_code` - The skin code. If you set a default skin code using the
     `DEFAULT_SKIN_CODE` settings, you can exclude this field. If you provide it
     anyway, it will overwrite the default skin code.
-* `session_validity` - The date the session expires, in ISO format.
+* `session_validity` - The date the session expires, provide as a Python date
+    object.
 
 Optional Adyen specific fields:
 
@@ -152,16 +154,16 @@ model. To get the url the form should post to, use the `url()` method.
 
     def forward_to_adyen(request):
 
-        tomorrow = (timezone.now() + timezone.timedelta(days=1)).isoformat()
+        tomorrow = (timezone.now() + timezone.timedelta(days=1))
 
         s = Session(
             session_type=constants.SESSION_TYPE_HPP_REGULAR,
             merchant_reference=51391,
             payment_amount=1000,
             currency_code=constants.CURRENCY_CODE_EUR,
-            ship_before_date=tomorrow.isoformat(),
+            ship_before_date=tomorrow,
             skin_code='Nl0r8s5C',
-            session_validity=tomorrow.isoformat(),
+            session_validity=tomorrow,
             shopper_reference=13154,
             shopper_email='shopper@example.com',
             page_type=constants.PAGE_TYPE_MULTIPLE
