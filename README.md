@@ -92,7 +92,7 @@ following:
 
 Now let's set up a Regular payment so you get a feeling of how it works.
 
-#### Regular payments
+#### Regular Payment
 
 ##### Fields
 
@@ -187,3 +187,9 @@ model. To get the url the form should post to, use the `url()` method.
     <script>
         document.forms[0].submit() // automatically submit the form
     </script>
+
+
+#### Oneclick Recurring Payment
+
+This readme isn't finished yet. The code however is usable, so don't hesitate
+to try it out.
