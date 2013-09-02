@@ -171,7 +171,7 @@ model. To get the url the form should post to, use the `url()` method.
         url = s.url()
         params = s.params()
 
-        render(request, 'forward.html', {
+        return render(request, 'forward.html', {
             'url': url,
             'params': params
         })
