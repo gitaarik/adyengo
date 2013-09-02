@@ -68,42 +68,121 @@ kind of payment, you fill the fields of the `Session` model.
 #### The `Session` model
 
 Most of the fields in the `Session` model reflect a field in the Adyen
-interface. The only difference is that Adyen uses camelCase and Adyengo uses
-under\_scores. So a field in the Adyen interface like `merchantReference` will
-become `merchant_reference` in Adyengo. For information about these fields
-please consult the Adyen Integration Manual.
+interface. The only difference is that Adyen uses `camelCase` and Adyengo uses
+`under_scores`. So a field in the Adyen interface like `merchantReference` will
+become `merchant_reference` in Adyengo. We will refer to these fields as "Adyen
+specific fields", other fields we'll call "Adyengo specific fields". When a
+field in the `Session` model is a Adyen specific field it will be pointed out.
+In this case you can get more information about the field in the Adyen
+Integration Manual.
 
 Besides that, the `Session` model has some other fields for internal logic.
+The most important one is the `session_type` field. This field decices what
+kind of payment the session represents.
 
-* `session_type` - The type of session. Choices are `hpp_regular`,
-    `hpp_recurring` and `api_recurring`, but it is advised to use the
-    constants for these variables, defined in `constants.py`.
+The choices for this field are defined in the `constants.py` which you can
+import using `from adyengo import constants`. Then you can choose one of the
+following:
 
-    The constants for `session_type` are:
+* `constants.SESSION_TYPE_HPP_REGULAR` - For a regular payment.
+* `constants.SESSION_TYPE_HPP_RECURRING` - To setup a recurring contract,
+    or to do a "oneclick" recurring payment.
+* `constants.SESSION_TYPE_API_RECURRING` - For a recurring payment.
 
-    * `SESSION_TYPE_HPP_REGULAR` - For a regular payment.
-    * `SESSION_TYPE_HPP_RECURRING` - To setup a recurring contract, or to do a
-        "oneclick" recurring payment.
-    * `SESSION_TYPE_API_RECURRING` - For a recurring payment.
+Now let's set up a Regular payment so you get a feeling of how it works.
 
 #### Regular payments
 
-To set up a 
+##### Fields
 
+To set up a regular payment, you should set the `session_type` field to
+`constants.SESSION_TYPE_HPP_REGULAR` and provide the following Adyen specific
+fields:
+
+* `merchant_reference` - Unique id for the session.
+* `payment_amount` - Amount for the payment in cents.
+* `currency_code` - The currency code for the currency the amount is in.
+    Choices are listed in the constants starting with `CURRENCY_CODE_`, for
+    example `CURRENCY_CODE_EUR` for Euro.
+* `ship_before_date` - The date the product should be shipped, in ISO format.
+* `skin_code` - The skin code. If you set a default skin code using the
+    `DEFAULT_SKIN_CODE` settings, you can exclude this field. If you provide it
+    anyway, it will overwrite the default skin code.
+* `session_validity` - The date the session expires, in ISO format.
+
+Optional Adyen specific fields:
+
+* `shopper_reference` - Unique id for the customer.
+* `shopper_email` - Email address for the customer.
+
+There's one Adyengo specific field you should provide, `page_type`. This field
+decides to what kind of page the user gets forwarded. The choices are defined
+in the constants:
+
+* `constants.PAGE_TYPE_MULTIPLE` - For a multiple pages flow.
+* `constants.PAGE_TYPE_SINGLE` - For a more modern single page app.
+* `constants.PAGE_TYPE_SKIP` - To skip the page flow. For this choice,
+    precicely one allowed payment method should be provided. We'll describe
+    later how to do that.
+
+##### Logging
+
+When you've set up the `Session` model, you can `save()` it. This will
+automatically turn into a log for you which you can consult in the Django
+Admin.
+
+##### Params
+
+To forward the user to adyen, you should have the session set up and put the
+parameters in hidden form fields on the page you forward the user. You can then
+either have the user forward himself by clicking a submit button, or
+automatically forward the user by submitting the form with javascript.
+
+To get the parameters for the form, use the `params()` method on the `Session`
+model. To get the url the form should post to, use the `url()` method.
+
+##### Example
+
+*view.py*
+
+    from django.shortcuts import render
     from adyengo.models import Session
     from adyengo import constants
 
-    s = Session(
-        session_type=constants.SESSION_TYPE_HPP_REGULAR,
-        merchant_reference=51391,
-        payment_amount=1000,
-        currency_code='EUR',
-        ship_before_date=dateobject.isoformat(),
-        skin_code='Nl0r8s5C',
-        session_validity=dateobject.isoformat(),
-        shopper_reference=13154,
-        shopper_email='shopper@example.com',
-        page_type=constants.PAGE_TYPE_MULTIPLE
-    )
-    s.save()
-    params = s.params()
+    def forward_to_adyen(request):
+
+        tomorrow = (timezone.now() + timezone.timedelta(days=1)).isoformat()
+
+        s = Session(
+            session_type=constants.SESSION_TYPE_HPP_REGULAR,
+            merchant_reference=51391,
+            payment_amount=1000,
+            currency_code=constants.CURRENCY_CODE_EUR,
+            ship_before_date=tomorrow.isoformat(),
+            skin_code='Nl0r8s5C',
+            session_validity=tomorrow.isoformat(),
+            shopper_reference=13154,
+            shopper_email='shopper@example.com',
+            page_type=constants.PAGE_TYPE_MULTIPLE
+        )
+        s.save()
+
+        url = s.url()
+        params = s.params()
+
+        render(request, 'forward.html', {
+            'url': url,
+            'params': params
+        })
+
+*forward.html*
+
+    <form method="POST" action="{{ url }}">
+        {% for var, value in params.items %}
+            <input type="hidden" name="{{ var }}" value="{{ value }}" />
+        {% endfor %}
+    </form>
+
+    <script>
+        document.forms[0].submit()
+    </script>
