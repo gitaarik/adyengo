@@ -50,7 +50,7 @@ class NotificationAdmin(admin.ModelAdmin):
 
         if instance.session.id:
             change_url = urlresolvers.reverse(
-                'admin:adyen_session_change', args=(instance.session.id,)
+                'admin:adyengo_session_change', args=(instance.session.id,)
             )
 
             return '<a class="changelink" href="{}">Session</a>'.format(
@@ -82,7 +82,7 @@ class RecurringPaymentResultAdmin(admin.ModelAdmin):
 
         if instance.session.id:
             change_url = urlresolvers.reverse(
-                'admin:adyen_session_change', args=(instance.session.id,)
+                'admin:adyengo_session_change', args=(instance.session.id,)
             )
 
             return '<a class="changelink" href="{}">Session</a>'.format(

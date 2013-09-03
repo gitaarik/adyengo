@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
 
-class AdyenSite(object):
+class AdyengoSite(object):
 
     @property
     def urls(self):
@@ -15,7 +15,7 @@ class AdyenSite(object):
             url(r'^$', RedirectView.as_view(url='hpp/setup_session/')),
         )
 
-        urlpatterns += patterns('adyen.views',
+        urlpatterns += patterns('adyengo.views',
 
             url(r'^hpp/setup_session/((?P<session_type>\w+)/)?', 'hpp_setup_session', name='hpp_setup_session'),
             url(r'^hpp/dispatch_session/', 'hpp_dispatch_session', name='hpp_dispatch_session'),
@@ -29,7 +29,7 @@ class AdyenSite(object):
 
         )
 
-        return urlpatterns, 'adyen', 'adyen'
+        return urlpatterns, 'adyengo', 'adyengo'
 
 
-site = AdyenSite()
+site = AdyengoSite()

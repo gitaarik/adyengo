@@ -28,14 +28,14 @@ def hpp_setup_session(request, session_type):
         'shopper_reference': uuid.uuid4()
     }
 
-    return render(request, 'adyen/hpp/setup_session.html', {
+    return render(request, 'adyengo/hpp/setup_session.html', {
         'session_type_hpp_regular': constants.SESSION_TYPE_HPP_REGULAR,
         'session_type_hpp_recurring': constants.SESSION_TYPE_HPP_RECURRING,
         'session_type': session_type,
         'currency_codes': constants.CURRENCY_CODES,
         'payment_methods': constants.PAYMENT_METHODS,
         'recurring_contract_types': constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS,
-        'dispatch_url': reverse('adyen:hpp_dispatch_session'),
+        'dispatch_url': reverse('adyengo:hpp_dispatch_session'),
         'params': params
     })
 
@@ -63,25 +63,25 @@ def hpp_dispatch_session(request):
 
     if request.POST.get('allowed_payment_methods'):
         for m in request.POST.getlist('allowed_payment_methods'):
-            s.allowedpaymentmethods.add(
+            s.allowed_payment_methods.add(
                 SessionAllowedPaymentMethods(method=m)
             )
 
     if request.POST.get('blocked_payment_methods'):
         for m in request.POST.getlist('blocked_payment_methods'):
-            s.blockedpaymentmethods.add(
+            s.blocked_payment_methods.add(
                 SessionBlockedPaymentMethods(method=m)
             )
 
-    return render(request, 'adyen/hpp/dispatch_session.html', {
+    return render(request, 'adyengo/hpp/dispatch_session.html', {
         'url': s.url(),
         'params': s.hpp_params()
     })
 
 
 def api_setup_request_contracts(request):
-    return render(request, 'adyen/api/setup_request_contracts.html', {
-        'execute_url': reverse('adyen:api_execute_request_contracts')
+    return render(request, 'adyengo/api/setup_request_contracts.html', {
+        'execute_url': reverse('adyengo:api_execute_request_contracts')
     })
 
 
@@ -92,7 +92,7 @@ def api_execute_request_contracts(request):
         request.POST.get('contract_type')
     )
 
-    return render(request, 'adyen/api/execute_request_contracts.html', {
+    return render(request, 'adyengo/api/execute_request_contracts.html', {
         'contracts': contracts
     })
 
@@ -106,8 +106,8 @@ def api_setup_recurring_session(request):
         'currency_code': settings.DEFAULT_CURRENCY_CODE
     }
 
-    return render(request, 'adyen/api/setup_recurring_session.html', {
-        'execute_url': reverse('adyen:api_execute_recurring_session'),
+    return render(request, 'adyengo/api/setup_recurring_session.html', {
+        'execute_url': reverse('adyengo:api_execute_recurring_session'),
         'params': params,
         'currency_codes': constants.CURRENCY_CODES,
         'recurring_contract_types': constants.RECURRING_CONTRACT_TYPES,
@@ -137,7 +137,7 @@ def api_execute_recurring_session(request):
 
     result = s.exec_recurring_payment()
 
-    return render(request, 'adyen/api/execute_recurring_session.html', {
+    return render(request, 'adyengo/api/execute_recurring_session.html', {
         'result': result
     })
 

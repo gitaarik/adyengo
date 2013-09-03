@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'Session'
-        db.create_table(u'adyen_session', (
+        db.create_table(u'adyengo_session', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('session_type', self.gf('django.db.models.fields.CharField')(max_length=25)),
             ('merchant_reference', self.gf('django.db.models.fields.CharField')(unique=True, max_length=80)),
@@ -32,59 +32,62 @@ class Migration(SchemaMigration):
             ('page_type', self.gf('django.db.models.fields.CharField')(max_length=15)),
             ('creation_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal(u'adyen', ['Session'])
+        db.send_create_signal(u'adyengo', ['Session'])
 
         # Adding model 'SessionAllowedPaymentMethods'
-        db.create_table(u'adyen_sessionallowedpaymentmethods', (
+        db.create_table(u'adyengo_sessionallowedpaymentmethods', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='allowed_payment_methods', to=orm['adyen.Session'])),
+            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='allowed_payment_methods', to=orm['adyengo.Session'])),
             ('method', self.gf('django.db.models.fields.CharField')(max_length=50)),
         ))
-        db.send_create_signal(u'adyen', ['SessionAllowedPaymentMethods'])
+        db.send_create_signal(u'adyengo', ['SessionAllowedPaymentMethods'])
 
         # Adding model 'SessionBlockedPaymentMethods'
-        db.create_table(u'adyen_sessionblockedpaymentmethods', (
+        db.create_table(u'adyengo_sessionblockedpaymentmethods', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='blocked_payment_methods', to=orm['adyen.Session'])),
+            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='blocked_payment_methods', to=orm['adyengo.Session'])),
             ('method', self.gf('django.db.models.fields.CharField')(max_length=50)),
         ))
-        db.send_create_signal(u'adyen', ['SessionBlockedPaymentMethods'])
+        db.send_create_signal(u'adyengo', ['SessionBlockedPaymentMethods'])
 
         # Adding model 'RecurringContract'
-        db.create_table(u'adyen_recurringcontract', (
+        db.create_table(u'adyengo_recurringcontract', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('recurring_detail_reference', self.gf('django.db.models.fields.CharField')(max_length=150, blank=True)),
             ('shopper_reference', self.gf('django.db.models.fields.CharField')(max_length=80)),
             ('contract_type', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('recurring_detail_reference', self.gf('django.db.models.fields.CharField')(max_length=150, blank=True)),
+            ('payment_method_type', self.gf('django.db.models.fields.CharField')(max_length=15)),
             ('variant', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
             ('creation_date', self.gf('django.db.models.fields.DateTimeField')(blank=True)),
-            ('payment_method_type', self.gf('django.db.models.fields.CharField')(max_length=15)),
             ('creation_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal(u'adyen', ['RecurringContract'])
+        db.send_create_signal(u'adyengo', ['RecurringContract'])
+
+        # Adding unique constraint on 'RecurringContract', fields ['recurring_detail_reference', 'shopper_reference']
+        db.create_unique(u'adyengo_recurringcontract', ['recurring_detail_reference', 'shopper_reference'])
 
         # Adding model 'RecurringContractDetail'
-        db.create_table(u'adyen_recurringcontractdetail', (
+        db.create_table(u'adyengo_recurringcontractdetail', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('recurring_contract', self.gf('django.db.models.fields.related.ForeignKey')(related_name='details', to=orm['adyen.RecurringContract'])),
+            ('recurring_contract', self.gf('django.db.models.fields.related.ForeignKey')(related_name='details', to=orm['adyengo.RecurringContract'])),
             ('key', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('value', self.gf('django.db.models.fields.CharField')(max_length=250, blank=True)),
         ))
-        db.send_create_signal(u'adyen', ['RecurringContractDetail'])
+        db.send_create_signal(u'adyengo', ['RecurringContractDetail'])
 
         # Adding model 'RecurringPaymentResult'
-        db.create_table(u'adyen_recurringpaymentresult', (
+        db.create_table(u'adyengo_recurringpaymentresult', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='recurring_payment_results', to=orm['adyen.Session'])),
+            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='recurring_payment_results', to=orm['adyengo.Session'])),
             ('psp_reference', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=20)),
             ('result_code', self.gf('django.db.models.fields.CharField')(max_length=30)),
             ('auth_code', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
             ('refusal_reason', self.gf('django.db.models.fields.CharField')(max_length=250, blank=True)),
         ))
-        db.send_create_signal(u'adyen', ['RecurringPaymentResult'])
+        db.send_create_signal(u'adyengo', ['RecurringPaymentResult'])
 
         # Adding model 'Notification'
-        db.create_table(u'adyen_notification', (
+        db.create_table(u'adyengo_notification', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('ip_address', self.gf('django.db.models.fields.CharField')(max_length=45)),
             ('live', self.gf('django.db.models.fields.BooleanField')(default=False)),
@@ -100,44 +103,47 @@ class Migration(SchemaMigration):
             ('reason', self.gf('django.db.models.fields.CharField')(max_length=250, blank=True)),
             ('amount', self.gf('django.db.models.fields.CharField')(max_length=15, blank=True)),
             ('valid', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
-            ('session', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['adyen.Session'], null=True)),
+            ('session', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['adyengo.Session'], null=True)),
             ('creation_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal(u'adyen', ['Notification'])
+        db.send_create_signal(u'adyengo', ['Notification'])
 
-        # Adding unique constraint on 'Notification', fields ['live', 'psp_reference', 'event_code']
-        db.create_unique(u'adyen_notification', ['live', 'psp_reference', 'event_code'])
+        # Adding unique constraint on 'Notification', fields ['live', 'merchant_account_code', 'psp_reference', 'event_code', 'success']
+        db.create_unique(u'adyengo_notification', ['live', 'merchant_account_code', 'psp_reference', 'event_code', 'success'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Notification', fields ['live', 'psp_reference', 'event_code']
-        db.delete_unique(u'adyen_notification', ['live', 'psp_reference', 'event_code'])
+        # Removing unique constraint on 'Notification', fields ['live', 'merchant_account_code', 'psp_reference', 'event_code', 'success']
+        db.delete_unique(u'adyengo_notification', ['live', 'merchant_account_code', 'psp_reference', 'event_code', 'success'])
+
+        # Removing unique constraint on 'RecurringContract', fields ['recurring_detail_reference', 'shopper_reference']
+        db.delete_unique(u'adyengo_recurringcontract', ['recurring_detail_reference', 'shopper_reference'])
 
         # Deleting model 'Session'
-        db.delete_table(u'adyen_session')
+        db.delete_table(u'adyengo_session')
 
         # Deleting model 'SessionAllowedPaymentMethods'
-        db.delete_table(u'adyen_sessionallowedpaymentmethods')
+        db.delete_table(u'adyengo_sessionallowedpaymentmethods')
 
         # Deleting model 'SessionBlockedPaymentMethods'
-        db.delete_table(u'adyen_sessionblockedpaymentmethods')
+        db.delete_table(u'adyengo_sessionblockedpaymentmethods')
 
         # Deleting model 'RecurringContract'
-        db.delete_table(u'adyen_recurringcontract')
+        db.delete_table(u'adyengo_recurringcontract')
 
         # Deleting model 'RecurringContractDetail'
-        db.delete_table(u'adyen_recurringcontractdetail')
+        db.delete_table(u'adyengo_recurringcontractdetail')
 
         # Deleting model 'RecurringPaymentResult'
-        db.delete_table(u'adyen_recurringpaymentresult')
+        db.delete_table(u'adyengo_recurringpaymentresult')
 
         # Deleting model 'Notification'
-        db.delete_table(u'adyen_notification')
+        db.delete_table(u'adyengo_notification')
 
 
     models = {
-        u'adyen.notification': {
-            'Meta': {'ordering': "('-creation_time',)", 'unique_together': "(('live', 'psp_reference', 'event_code'),)", 'object_name': 'Notification'},
+        u'adyengo.notification': {
+            'Meta': {'ordering': "('-creation_time',)", 'unique_together': "(('live', 'merchant_account_code', 'psp_reference', 'event_code', 'success'),)", 'object_name': 'Notification'},
             'amount': ('django.db.models.fields.CharField', [], {'max_length': '15', 'blank': 'True'}),
             'creation_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'event_code': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
@@ -152,12 +158,12 @@ class Migration(SchemaMigration):
             'payment_method': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'psp_reference': ('django.db.models.fields.CharField', [], {'max_length': '150', 'blank': 'True'}),
             'reason': ('django.db.models.fields.CharField', [], {'max_length': '250', 'blank': 'True'}),
-            'session': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['adyen.Session']", 'null': 'True'}),
+            'session': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['adyengo.Session']", 'null': 'True'}),
             'success': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'valid': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'})
         },
-        u'adyen.recurringcontract': {
-            'Meta': {'ordering': "('-creation_time',)", 'object_name': 'RecurringContract'},
+        u'adyengo.recurringcontract': {
+            'Meta': {'ordering': "('-creation_time',)", 'unique_together': "(('recurring_detail_reference', 'shopper_reference'),)", 'object_name': 'RecurringContract'},
             'contract_type': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
             'creation_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -167,23 +173,23 @@ class Migration(SchemaMigration):
             'shopper_reference': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
             'variant': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'})
         },
-        u'adyen.recurringcontractdetail': {
+        u'adyengo.recurringcontractdetail': {
             'Meta': {'object_name': 'RecurringContractDetail'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'recurring_contract': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'details'", 'to': u"orm['adyen.RecurringContract']"}),
+            'recurring_contract': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'details'", 'to': u"orm['adyengo.RecurringContract']"}),
             'value': ('django.db.models.fields.CharField', [], {'max_length': '250', 'blank': 'True'})
         },
-        u'adyen.recurringpaymentresult': {
+        u'adyengo.recurringpaymentresult': {
             'Meta': {'object_name': 'RecurringPaymentResult'},
             'auth_code': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'psp_reference': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '20'}),
             'refusal_reason': ('django.db.models.fields.CharField', [], {'max_length': '250', 'blank': 'True'}),
             'result_code': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'recurring_payment_results'", 'to': u"orm['adyen.Session']"})
+            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'recurring_payment_results'", 'to': u"orm['adyengo.Session']"})
         },
-        u'adyen.session': {
+        u'adyengo.session': {
             'Meta': {'ordering': "('-creation_time',)", 'object_name': 'Session'},
             'country_code': ('django.db.models.fields.CharField', [], {'max_length': '2', 'blank': 'True'}),
             'creation_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -207,18 +213,18 @@ class Migration(SchemaMigration):
             'shopper_statement': ('django.db.models.fields.CharField', [], {'max_length': '135', 'blank': 'True'}),
             'skin_code': ('django.db.models.fields.CharField', [], {'default': "'Nl0r8s5C'", 'max_length': '10'})
         },
-        u'adyen.sessionallowedpaymentmethods': {
+        u'adyengo.sessionallowedpaymentmethods': {
             'Meta': {'object_name': 'SessionAllowedPaymentMethods'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'method': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'allowed_payment_methods'", 'to': u"orm['adyen.Session']"})
+            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'allowed_payment_methods'", 'to': u"orm['adyengo.Session']"})
         },
-        u'adyen.sessionblockedpaymentmethods': {
+        u'adyengo.sessionblockedpaymentmethods': {
             'Meta': {'object_name': 'SessionBlockedPaymentMethods'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'method': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'blocked_payment_methods'", 'to': u"orm['adyen.Session']"})
+            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'blocked_payment_methods'", 'to': u"orm['adyengo.Session']"})
         }
     }
 
-    complete_apps = ['adyen']
+    complete_apps = ['adyengo']

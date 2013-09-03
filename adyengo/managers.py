@@ -108,7 +108,7 @@ class RecurringContractManager(models.Manager):
             fields = getattr(detail, payment_method_type)
 
             RecurringContractDetail = models.get_model(
-                'adyen', 'RecurringContractDetail')
+                'adyengo', 'RecurringContractDetail')
 
             for fieldname in constants.RECURRING_CONTRACT_VARIANT_FIELDS[payment_method_type]:
 

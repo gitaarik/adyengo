@@ -37,10 +37,10 @@ To start out you should add some settings to your main `settings.py`.
 
 #### Required settings
 
-* `ADYEN_MERCHANT_ACCOUNT` - Your Adyen merchant account.
-* `ADYEN_SHARED_SECRET` - The shared secret used to validate the communication with
+* `ADYENGO_MERCHANT_ACCOUNT` - Your Adyen merchant account.
+* `ADYENGO_SHARED_SECRET` - The shared secret used to validate the communication with
     Adyen.
-* `ADYEN_MODE` - Use `test` to use the Adyen test environment or `live` to use the
+* `ADYENGO_MODE` - Use `test` to use the Adyen test environment or `live` to use the
     live environment.
 
 #### Required for Recurring Payments
