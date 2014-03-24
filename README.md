@@ -137,8 +137,8 @@ Admin.
 ##### Params
 
 To forward the user to adyen, you should have the session set up and put the
-parameters in hidden form fields on the page you forward the user. You can then
-either have the user forward himself by clicking a submit button, or
+parameters in hidden form fields on the page you want to forward the user. You 
+can then either have the user forward himself by clicking a submit button, or
 automatically forward the user by submitting the form with javascript.
 
 To get the parameters for the form, use the `params()` method on the `Session`
