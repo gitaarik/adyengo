@@ -61,7 +61,7 @@ There are two ways to do a payment through Adyen. One is to forward the
 customer to the **Adyen Hosted Payment Pages (HPP)** and the other is to do a
 **Recurring Payment through Adyen's API**.
 
-Adyengo is reflects Adyen's interface in regular Django models and managers.
+Adyengo reflects Adyen's interface in regular Django models and managers.
 The main model to setup a payment is the `Session` model. Depending on what
 kind of payment, you fill the fields of the `Session` model.
 
