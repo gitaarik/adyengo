@@ -116,7 +116,7 @@ fields:
 Optional Adyen specific fields:
 
 * `shopper_reference` - Unique id for the customer.
-* `shopper_email` - Email address for the customer.
+* `shopper_email` - The customer's email address.
 
 There's one Adyengo specific field you should provide, `page_type`. This field
 decides to what kind of page the user gets forwarded. The choices are defined
