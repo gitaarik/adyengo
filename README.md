@@ -72,7 +72,7 @@ interface. The only difference is that Adyen uses `camelCase` and Adyengo uses
 `under_scores`. So a field in the Adyen interface like `merchantReference` will
 become `merchant_reference` in Adyengo. We will refer to these fields as "Adyen
 specific fields", other fields we'll call "Adyengo specific fields". When a
-field in the `Session` model is a Adyen specific field it will be pointed out.
+field in the `Session` model is an Adyen specific field it will be pointed out.
 In this case you can get more information about the field in the Adyen
 Integration Manual.
 
