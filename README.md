@@ -196,3 +196,20 @@ model. To get the url the form should post to, use the `url()` method.
 
 This readme isn't finished yet. The code however is usable, so don't hesitate
 to try it out.
+
+#### Adyengo Test screens
+
+Adyengo has some test screens, which makes it easy to test different
+kind of requests to Adyen. You can enable them by adding them to your main
+`urls.py`:
+
+    import adyengo
+
+    urlpatterns = patterns('',
+        # Here your regular urlpatterns
+    )
+
+    if settings.DEBUG:
+        urlpatterns += patterns('',
+            url(r'^adyengo-test/', include(adyengo.site.urls))
+        )
