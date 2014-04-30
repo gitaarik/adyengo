@@ -1,3 +1,0 @@
-ipaddress==1.0.4
-python-dateutil==2.1
-suds==0.4

@@ -25,8 +25,9 @@ If you want to contribute, you're very welcome. Contact me for any questions.
 
 ## Installation
 
-I haven't made a pip install for it yet, so you'll have to manually add it to
-your project. Don't forget to install the requirements in `requirements.txt`.
+You can install Adyengo with pip:
+
+    pip install git+git://github.com/gitaarik/adyengo.git
 
 
 ## Implementation
