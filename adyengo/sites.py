@@ -9,7 +9,10 @@ class AdyengoSite(object):
     def urls(self):
 
         if not settings.DEBUG:
-            return
+            raise Exception(
+                "Please don't include Adyengo test page URL's when "
+                "`DEBUG` is `False`."
+            )
 
         urlpatterns = patterns('django.views.generic.simple',
             url(r'^$', RedirectView.as_view(url='hpp/setup_session/')),
