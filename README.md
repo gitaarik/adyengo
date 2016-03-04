@@ -39,22 +39,22 @@ To start out you should add some settings to your main `settings.py`.
 #### Required settings
 
 * `ADYENGO_MERCHANT_ACCOUNT` - Your Adyen merchant account.
-* `ADYENGO_SHARED_SECRET` - The shared secret used to validate the communication with
-    Adyen.
-* `ADYENGO_MODE` - Use `test` to use the Adyen test environment or `live` to use the
-    live environment.
+* `ADYENGO_HMAC_KEY` - The HMAC key used to validate the communication with
+  Adyen.
+* `ADYENGO_MODE` - Use `test` to use the Adyen test environment or `live` to
+  use the live environment. Default to `test`.
 
 #### Required for Recurring Payments
 
-* `WEB_SERVICES_USERNAME` - The username for the Adyen Web Services SOAP API.
-* `WEB_SERVICES_PASSWORD` - The password for the Adyen Web Services SOAP API.
-* `WEB_SERVICES_PUBLIC_KEY` - The public key for the Adyen Web Services SOAP API.
+* `ADYENGO_WEB_SERVICES_USERNAME` - The username for the Adyen Web Services SOAP API.
+* `ADYENGO_WEB_SERVICES_PASSWORD` - The password for the Adyen Web Services SOAP API.
+* `ADYENGO_WEB_SERVICES_PUBLIC_KEY` - The public key for the Adyen Web Services SOAP API.
 
 #### Optional settings
 
-* `DEFAULT_SKIN_CODE` - The default skin code. Can always be overwritten.
-* `DEFAULT_CURRENCY_CODE` - The default currency code. Can always be
-    overwritten.
+* `ADYENGO_DEFAULT_SKIN_CODE` - The default skin code. Can always be overwritten.
+* `ADYENGO_DEFAULT_CURRENCY_CODE` - The default currency code. Can always be
+  overwritten.
 
 ### Usage
 
@@ -204,13 +204,14 @@ Adyengo has some test pages, which makes it easy to test different
 kind of requests to Adyen. You can enable them by adding them to your main
 `urls.py`:
 
+    from django.conf import settings
     import adyengo
 
-    urlpatterns = patterns('',
+    urlpatterns = [
         # Here your regular urlpatterns
     )
 
     if settings.DEBUG:
-        urlpatterns += patterns('',
+        urlpatterns += [
             url(r'^adyengo-test/', include(adyengo.site.urls))
-        )
+        ]

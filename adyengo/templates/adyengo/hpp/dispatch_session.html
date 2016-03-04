@@ -7,10 +7,10 @@
         <h2>Post to:</h2>
         {{ url }}
 
-        <h2>Fields:</h2>
+        <h2>Params:</h2>
 
         <table>
-            {% for name, value in params.iteritems %}
+            {% for name, value in params.items %}
                 <tr>
                     <th>{{ name }}</th>
                     <td>
@@ -20,9 +20,6 @@
                 </tr>
             {% endfor %}
         </table>
-
-        <h2>Signature:</h2>
-
 
         <input type="submit" value="Dispatch">
 

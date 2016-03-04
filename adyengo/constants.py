@@ -41,62 +41,62 @@ CURRENCY_CODES = {
 
 # Locales
 
-LOCALE_NL_NL = 'nl_NL'
-LOCALE_NL_BE = 'nl_BE'
-LOCALE_FR_BE = 'fr_BE'
 LOCALE_DE_DE = 'de_DE'
 LOCALE_EN_GB = 'en_GB'
+LOCALE_FR_BE = 'fr_BE'
+LOCALE_NL_BE = 'nl_BE'
+LOCALE_NL_NL = 'nl_NL'
 
 LOCALES = {
-    LOCALE_NL_NL: "Dutch (Holland)",
-    LOCALE_NL_BE: "Dutch (Belgium)",
-    LOCALE_FR_BE: "French (Belgium)",
     LOCALE_DE_DE: "German (Germany)",
-    LOCALE_EN_GB: "English (United Kingdom)"
+    LOCALE_EN_GB: "English (United Kingdom)",
+    LOCALE_FR_BE: "French (Belgium)",
+    LOCALE_NL_BE: "Dutch (Belgium)",
+    LOCALE_NL_NL: "Dutch (Holland)"
 }
 
 # Country Code
 
-COUNTRY_CODE_NL = 'NL'
 COUNTRY_CODE_BE = 'BE'
 COUNTRY_CODE_DE = 'DE'
 COUNTRY_CODE_GB = 'GB'
+COUNTRY_CODE_NL = 'NL'
 
 COUNTRY_CODES = {
-    COUNTRY_CODE_NL: "Netherlands",
     COUNTRY_CODE_BE: "Belgium",
     COUNTRY_CODE_DE: "Germany",
-    COUNTRY_CODE_GB: "United Kingdom"
+    COUNTRY_CODE_GB: "United Kingdom",
+    COUNTRY_CODE_NL: "Netherlands"
 }
 
 # Payment Method
 
-PAYMENT_METHOD_VISA = 'visa'
-PAYMENT_METHOD_MC = 'mc'
 PAYMENT_METHOD_AMEX = 'amex'
-PAYMENT_METHOD_IDEAL = 'ideal'
-PAYMENT_METHOD_BANKTRANSFER_NL = 'bankTransfer_NL'
+PAYMENT_METHOD_BANKTRANSFER = 'bankTransfer'
 PAYMENT_METHOD_BANKTRANSFER_DE = 'bankTransfer_DE'
-PAYMENT_METHOD_ELV = 'elv'
+PAYMENT_METHOD_BANKTRANSFER_NL = 'bankTransfer_NL'
+PAYMENT_METHOD_CARD = 'card'
 PAYMENT_METHOD_DIRECTDEBIT_NL = 'directdebit_NL'
 PAYMENT_METHOD_DIRECT_E_BANKING = 'directEbanking'
+PAYMENT_METHOD_ELV = 'elv'
+PAYMENT_METHOD_IDEAL = 'ideal'
+PAYMENT_METHOD_MC = 'mc'
 PAYMENT_METHOD_PAYPAL = 'paypal'
-PAYMENT_METHOD_CARD = 'card'
-PAYMENT_METHOD_BANKTRANSFER = 'bankTransfer'
+PAYMENT_METHOD_VISA = 'visa'
 
 PAYMENT_METHODS = {
-    PAYMENT_METHOD_VISA: "Visa",
-    PAYMENT_METHOD_MC: "Master Card",
     PAYMENT_METHOD_AMEX: "Amex",
-    PAYMENT_METHOD_IDEAL: "iDEAL",
-    PAYMENT_METHOD_BANKTRANSFER_NL: "Dutch Banktransfer",
+    PAYMENT_METHOD_BANKTRANSFER: "All banktransfers",
     PAYMENT_METHOD_BANKTRANSFER_DE: "German Banktransfer",
-    PAYMENT_METHOD_ELV: "ELV",
+    PAYMENT_METHOD_BANKTRANSFER_NL: "Dutch Banktransfer",
+    PAYMENT_METHOD_CARD: "All debit and credit cards",
     PAYMENT_METHOD_DIRECTDEBIT_NL: "Direct Debit (Netherlands)",
     PAYMENT_METHOD_DIRECT_E_BANKING: "SofortUberweisung",
+    PAYMENT_METHOD_ELV: "ELV",
+    PAYMENT_METHOD_IDEAL: "iDEAL",
+    PAYMENT_METHOD_MC: "Master Card",
     PAYMENT_METHOD_PAYPAL: "PayPal",
-    PAYMENT_METHOD_CARD: "All debit and credit cards",
-    PAYMENT_METHOD_BANKTRANSFER: "All banktransfers",
+    PAYMENT_METHOD_VISA: "Visa",
 }
 
 
@@ -204,10 +204,10 @@ NOTIFICATION_EVENT_CODES = {
 # Adyen servers ip addresses
 
 ADYEN_SERVERS_IP_ADDRESS_RANGES = (
-    u'82.199.87.128/26', # 82.199.87.129 to 82.199.87.191
-    u'82.199.90.136/29', # 82.199.90.137 to 82.199.90.142
-    u'82.199.90.160/27', # 82.199.90.161 to 82.199.90.190
-    u'91.212.42.0/24'    # 91.212.42.1 to 91.212.42.254
+    u'82.199.87.128/26',  # 82.199.87.129 to 82.199.87.191
+    u'82.199.90.136/29',  # 82.199.90.137 to 82.199.90.142
+    u'82.199.90.160/27',  # 82.199.90.161 to 82.199.90.190
+    u'91.212.42.0/24'     # 91.212.42.1 to 91.212.42.254
 )
 
 # Only these IP addresses should be allowed to send notifications.

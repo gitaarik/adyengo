@@ -25,7 +25,7 @@
             width: 210px;
         }
 
-        .allowed_methods {
+        .allowed-methods {
             padding-right: 50px;
         }
 
@@ -70,6 +70,16 @@
 
         <table class="fields">
             <tr>
+                <th>Currency</th>
+                <td>
+                    <select name="currency_code">
+                        {% for key, value in currency_codes.items %}
+                            <option value="{{ key }}"{% if params.currency_code == key %} selected="selected"{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
                 <th>Merchant reference</th>
                 <td><input type="text" name="merchant_reference" value="{{ params.merchant_reference }}" /></td>
             </tr>
@@ -78,42 +88,40 @@
                 <td><input type="text" name="payment_amount" value="{{ params.payment_amount }}" /></td>
             </tr>
             <tr>
-                <th>Currency</th>
-                <td>
-                    {% for key, value in currency_codes.items %}
-                        <select name="currency_code">
-                            <option value="{{ key }}"{% if params.currency_code == key %} selected="selected"{% endif %}>{{ value }}</option>
-                        </select>
-                    {% endfor %}
-                </td>
+                <th>Session validity</th>
+                <td><input type="text" name="session_validity" value="{{ params.session_validity }}" /></td>
             </tr>
             <tr>
                 <th>Ship before date</th>
                 <td><input type="text" name="ship_before_date" value="{{ params.ship_before_date }}" /></td>
             </tr>
             <tr>
+                <th>Shopper locale</th>
+                <td>
+                    <select name="shopper_locale">
+                        {% for key, value in locales.items %}
+                            <option value="{{ key }}"{% if params.shopper_locale == key %} selected="selected"{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
                 <th>Skin code</th>
                 <td><input type="text" name="skin_code" value="{{ params.skin_code }}" /></td>
             </tr>
             <tr>
-                <th>Session validity</th>
-                <td><input type="text" name="session_validity" value="{{ params.session_validity }}" /></td>
-            </tr>
-            <tr>
-                <th>
-                    Shopper reference
-                    {% if session_type == session_type_hpp_regular %}(optional){% endif %}
-                </th>
+                <th>Shopper reference {% if session_type == session_type_hpp_regular %}(optional){% endif %}</th>
                 <td>
                     <input type="text" name="shopper_reference" value="{% if session_type == session_type_hpp_recurring %}{{ params.shopper_reference }}{% endif %}" />
                 </td>
             </tr>
             <tr>
-                <th>
-                    Shopper email
-                    {% if session_type == session_type_hpp_regular %}(optional){% endif %}
-                </th>
+                <th>Shopper email {% if session_type == session_type_hpp_regular %}(optional){% endif %}</th>
                 <td><input type="text" name="shopper_email" value="{% if session_type == session_type_hpp_recurring %}shopper@example.com{% endif %}" /></td>
+            </tr>
+            <tr>
+                <th>Res URL (optional)</th>
+                <td><input type="text" name="res_url" value="{{ params.res_url }}" /></td>
             </tr>
         </table>
 
@@ -131,13 +139,13 @@
 
         <table>
             <tr>
-                <td class="allowed_methods">
+                <td class="allowed-methods">
 
                     <h2>Allowed payment methods:</h2>
                     <p>If no selection is made, all methods will be allowed.</p>
 
                     <ul>
-                        {% for key, value in payment_methods.iteritems %}
+                        {% for key, value in payment_methods.items %}
                             <li><label><input type="checkbox" name="allowed_payment_methods" value="{{ key }}"> {{ value }}</label></li>
                         {% endfor %}
                     </ul>
@@ -149,7 +157,7 @@
                     <p>The user won't be allowed to pay with these methods.</p>
 
                     <ul>
-                        {% for key, value in payment_methods.iteritems %}
+                        {% for key, value in payment_methods.items %}
                             <li><label><input type="checkbox" name="blocked_payment_methods" value="{{ key }}"> {{ value }}</label></li>
                         {% endfor %}
                     </ul>

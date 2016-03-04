@@ -6,8 +6,10 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 
-from .models import (Session, SessionAllowedPaymentMethods,
-    SessionBlockedPaymentMethods, Notification, RecurringContract)
+from .models import (
+    Session, SessionAllowedPaymentMethods, SessionBlockedPaymentMethods,
+    Notification, RecurringContract
+)
 from . import constants, settings, utils
 
 
@@ -19,13 +21,15 @@ def hpp_setup_session(request, session_type):
     tomorrow = (timezone.now() + timezone.timedelta(days=1))
 
     params = {
+        'currency_code': settings.DEFAULT_CURRENCY_CODE,
         'merchant_reference': uuid.uuid4(),
         'payment_amount': 1000,
-        'currency_code': settings.DEFAULT_CURRENCY_CODE,
-        'ship_before_date': tomorrow,
         'session_validity': tomorrow,
+        'ship_before_date': tomorrow,
+        'shopper_locale': settings.DEFAULT_SHOPPER_LOCALE,
         'skin_code': settings.DEFAULT_SKIN_CODE,
-        'shopper_reference': uuid.uuid4()
+        'shopper_reference': uuid.uuid4(),
+        'res_url': settings.DEFAULT_RES_URL or 'http://{}{}'.format(request.get_host(), request.path)
     }
 
     return render(request, 'adyengo/hpp/setup_session.html', {
@@ -33,6 +37,7 @@ def hpp_setup_session(request, session_type):
         'session_type_hpp_recurring': constants.SESSION_TYPE_HPP_RECURRING,
         'session_type': session_type,
         'currency_codes': constants.CURRENCY_CODES,
+        'locales': constants.LOCALES,
         'payment_methods': constants.PAYMENT_METHODS,
         'recurring_contract_types': constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS,
         'dispatch_url': reverse('adyengo:hpp_dispatch_session'),
@@ -43,10 +48,9 @@ def hpp_setup_session(request, session_type):
 def hpp_dispatch_session(request):
 
     def p(p):
-        # Get post parameter
         return request.POST.get(p, '')
 
-    s = Session(
+    session = Session(
         session_type=p('session_type'),
         merchant_reference=p('merchant_reference'),
         payment_amount=p('payment_amount'),
@@ -57,25 +61,28 @@ def hpp_dispatch_session(request):
         shopper_reference=p('shopper_reference'),
         shopper_email=p('shopper_email'),
         recurring_contract=p('recurring_contract'),
-        page_type=p('page_type')
+        page_type=p('page_type'),
+        res_url=p('res_url')
     )
-    s.save()
+    session.save()
 
     if request.POST.get('allowed_payment_methods'):
         for m in request.POST.getlist('allowed_payment_methods'):
-            s.allowed_payment_methods.add(
-                SessionAllowedPaymentMethods(method=m)
+            session.allowed_payment_methods.add(
+                SessionAllowedPaymentMethods(method=m),
+                bulk=False
             )
 
     if request.POST.get('blocked_payment_methods'):
         for m in request.POST.getlist('blocked_payment_methods'):
-            s.blocked_payment_methods.add(
-                SessionBlockedPaymentMethods(method=m)
+            session.blocked_payment_methods.add(
+                SessionBlockedPaymentMethods(method=m),
+                bulk=False
             )
 
     return render(request, 'adyengo/hpp/dispatch_session.html', {
-        'url': s.url(),
-        'params': s.hpp_params()
+        'url': session.url(),
+        'params': session.hpp_params()
     })
 
 
@@ -120,7 +127,7 @@ def api_execute_recurring_session(request):
         # Get post parameter
         return request.POST.get(p, '')
 
-    s = Session(
+    session = Session(
         session_type=constants.SESSION_TYPE_API_RECURRING,
         merchant_reference=p('merchant_reference'),
         recurring_detail_reference=p('recurring_detail_reference'),
@@ -133,9 +140,9 @@ def api_execute_recurring_session(request):
         shopper_ip=p('shopper_ip'),
         shopper_statement=p('shopper_statement')
     )
-    s.save()
+    session.save()
 
-    result = s.exec_recurring_payment()
+    result = session.exec_recurring_payment()
 
     return render(request, 'adyengo/api/execute_recurring_session.html', {
         'result': result

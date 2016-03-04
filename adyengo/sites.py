@@ -1,6 +1,7 @@
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import RedirectView
+from . import views
 
 
 class AdyengoSite(object):
@@ -14,23 +15,35 @@ class AdyengoSite(object):
                 "`DEBUG` is `False`."
             )
 
-        urlpatterns = patterns('django.views.generic.simple',
+        urlpatterns = [
             url(r'^$', RedirectView.as_view(url='hpp/setup_session/')),
-        )
+            url(r'^hpp/setup_session/((?P<session_type>\w+)/)?', views.hpp_setup_session, name='hpp_setup_session'),
+            url(r'^hpp/dispatch_session/', views.hpp_dispatch_session, name='hpp_dispatch_session'),
 
-        urlpatterns += patterns('adyengo.views',
+            url(
+                r'^api/setup_request_contracts/',
+                views.api_setup_request_contracts,
+                name='api_setup_request_contracts'
+            ),
+            url(
+                r'^api/execute_request_contracts/',
+                views.api_execute_request_contracts,
+                name='api_execute_request_contracts'
+            ),
+            url(
+                r'^api/setup_recurring_session',
+                views.api_setup_recurring_session,
+                name='api_setup_recurring_session'
+            ),
+            url(
+                r'^api/execute_recurring_session',
+                views.api_execute_recurring_session,
+                name='api_execute_recurring_session'
+            ),
 
-            url(r'^hpp/setup_session/((?P<session_type>\w+)/)?', 'hpp_setup_session', name='hpp_setup_session'),
-            url(r'^hpp/dispatch_session/', 'hpp_dispatch_session', name='hpp_dispatch_session'),
+            url(r'^notification/', views.parse_notification, name='parse_notification')
 
-            url(r'^api/setup_request_contracts/', 'api_setup_request_contracts', name='api_setup_request_contracts'),
-            url(r'^api/execute_request_contracts/', 'api_execute_request_contracts', name='api_execute_request_contracts'),
-            url(r'^api/setup_recurring_session', 'api_setup_recurring_session', name='api_setup_recurring_session'),
-            url(r'^api/execute_recurring_session', 'api_execute_recurring_session', name='api_execute_recurring_session'),
-
-            url(r'^notification/', 'parse_notification', name='parse_notification')
-
-        )
+        ]
 
         return urlpatterns, 'adyengo', 'adyengo'
 

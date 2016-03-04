@@ -1,8 +1,10 @@
+import binascii
+import base64
 import hmac
 import hashlib
-import base64
-
 import ipaddress
+from collections import OrderedDict
+
 from django.db import models, IntegrityError
 from django.http import HttpResponse, HttpResponseForbidden
 
@@ -12,33 +14,39 @@ from . import settings, constants, api
 
 class Session(models.Model):
 
-    session_type = models.CharField(max_length=25,
-        choices=constants.SESSION_TYPES.items())
+    session_type = models.CharField(max_length=25, choices=constants.SESSION_TYPES.items())
     merchant_reference = models.CharField(max_length=80, unique=True)
     payment_amount = models.PositiveSmallIntegerField()
-    currency_code = models.CharField(max_length=3,
+    currency_code = models.CharField(
+        max_length=3,
         choices=constants.CURRENCY_CODES.items(),
-        default=settings.DEFAULT_CURRENCY_CODE)
+        default=settings.DEFAULT_CURRENCY_CODE
+    )
     ship_before_date = models.DateTimeField(null=True)
-    skin_code = models.CharField(max_length=10,
-        default=settings.DEFAULT_SKIN_CODE)
-    shopper_locale = models.CharField(blank=True, max_length=5,
-        choices=constants.LOCALES.items())
+    skin_code = models.CharField(max_length=10, default=settings.DEFAULT_SKIN_CODE)
+    shopper_locale = models.CharField(
+        blank=True,
+        max_length=5,
+        choices=constants.LOCALES.items(),
+        default=settings.DEFAULT_SHOPPER_LOCALE
+    )
     order_data = models.TextField(blank=True)
     session_validity = models.DateTimeField(null=True)
     merchant_return_data = models.CharField(max_length=128)
-    country_code = models.CharField(blank=True, max_length=2,
-        choices=constants.COUNTRY_CODES.items())
+    country_code = models.CharField(blank=True, max_length=2, choices=constants.COUNTRY_CODES.items())
     shopper_email = models.EmailField(blank=True)
     shopper_reference = models.CharField(blank=True, max_length=80)
     shopper_ip = models.CharField(blank=True, max_length=45)
     shopper_statement = models.CharField(blank=True, max_length=135)
     fraud_offset = models.PositiveIntegerField(null=True)
-    recurring_contract = models.CharField(blank=True, max_length=50,
-        choices=constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items())
+    recurring_contract = models.CharField(
+        blank=True,
+        max_length=50,
+        choices=constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items()
+    )
     recurring_detail_reference = models.CharField(blank=True, max_length=80)
-    page_type = models.CharField(max_length=15,
-        choices=constants.PAGE_TYPES.items())
+    res_url = models.CharField(blank=True, max_length=2000, default=settings.DEFAULT_RES_URL)
+    page_type = models.CharField(max_length=15, choices=constants.PAGE_TYPES.items())
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -56,21 +64,23 @@ class Session(models.Model):
     def is_api_recurring(self):
         return self.session_type == constants.SESSION_TYPE_API_RECURRING
 
-    def merchant_sig(self, p):
+    def merchant_sig(self, params):
 
-        fields = (
-            'paymentAmount', 'currencyCode', 'shipBeforeDate',
-            'merchantReference', 'skinCode', 'merchantAccount',
-            'sessionValidity', 'shopperEmail', 'shopperReference',
-            'recurringContract', 'allowedMethods', 'blockedMethods',
-            'shopperStatement', 'merchantReturnData', 'billingAddressType',
-            'deliveryAddressType', 'offset'
-        )
+        params = OrderedDict(sorted(params.items()))
+
+        def get_field_values():
+            return [
+                str(value).replace(r'\\', r'\\\\').replace(r':', r'\:')
+                for value in params.values()
+            ]
 
         return base64.encodestring(hmac.new(
-            settings.SHARED_SECRET,
-            ''.join([str(p[field]) for field in fields if field in p]),
-            hashlib.sha1
+            binascii.a2b_hex(settings.HMAC_KEY),
+            ':'.join(
+                list(params.keys()) +
+                get_field_values()
+            ).encode(),
+            hashlib.sha256
         ).digest()).strip()
 
     def url(self):
@@ -133,6 +143,9 @@ class Session(models.Model):
         if self.page_type == constants.PAGE_TYPE_SKIP:
             params['brandCode'] = params['allowedMethods']
 
+        if self.res_url:
+            params['resURL'] = self.res_url
+
         params['merchantSig'] = self.merchant_sig(params)
 
         return params
@@ -159,39 +172,31 @@ class Session(models.Model):
         elif self.recurring_contract == constants.RECURRING_CONTRACT_TYPE_ONECLICK:
             shopper_interaction = 'Ecommerce'
 
-        request = {
-            'merchantAccount': settings.MERCHANT_ACCOUNT,
-            'selectedRecurringDetailReference': self.recurring_detail_reference,
-            'recurring': {
-                'contract': self.recurring_contract
-            },
-            'amount': {
-                'value': self.payment_amount,
-                'currency': self.currency_code,
-            },
-            'reference': self.merchant_reference,
-            'shopperReference': self.shopper_reference,
-            'shopperEmail': self.shopper_email,
-            'shopperInteraction': shopper_interaction,
-        }
+        # if self.fraud_offset:
+        #     request['fraudOffset'] = self.fraud_offset
 
-        if self.fraud_offset:
-            request['fraudOffset'] = self.fraud_offset
+        # if self.shopper_statement:
+        #     request['shopperStatement'] = self.shopper_statement
 
-        if self.shopper_statement:
-            request['shopperStatement'] = self.shopper_statement
+        # if self.shopper_ip:
+        #     request['shopperIp'] = self.shopper_ip
 
-        if self.shopper_ip:
-            request['shopperIp'] = self.shopper_ip
-
-        response = api.payment_soap_client().service.authorise(request)
+        response = api.exec_recurring_payment(
+            contract_type=self.recurring_contract,
+            shopper_interaction=shopper_interaction,
+            shopper_reference=self.shopper_reference,
+            shopper_email=self.shopper_email,
+            merchant_reference=self.merchant_reference,
+            payment_amount=self.payment_amount,
+            currency_code=self.currency_code
+        )
 
         r = RecurringPaymentResult(
             session=self,
-            psp_reference=response.pspReference,
-            result_code=response.resultCode,
-            auth_code=response.authCode,
-            refusal_reason=response.refusalReason if response.refusalReason else ''
+            psp_reference=response.get('pspReference'),
+            result_code=response.get('resultCode'),
+            auth_code=response.get('authCode'),
+            refusal_reason=response.get('refusalReason', '')
         )
         r.save()
 
@@ -200,7 +205,7 @@ class Session(models.Model):
     def flush_recurring_contract_cache(self):
         """
         Flushes the Recurring Payment Contract cache we have for this
-        shopperreference and contract type.
+        shopper reference and contract type.
 
         This methods should be called when a session is authorized that
         potentially results in a new Recurring Payment Contract.
@@ -220,8 +225,7 @@ class Session(models.Model):
 class SessionAllowedPaymentMethods(models.Model):
 
     session = models.ForeignKey(Session, related_name='allowed_payment_methods')
-    method = models.CharField(max_length=50,
-        choices=constants.PAYMENT_METHODS.items())
+    method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
 
     def __unicode__(self):
         return self.method
@@ -230,8 +234,7 @@ class SessionAllowedPaymentMethods(models.Model):
 class SessionBlockedPaymentMethods(models.Model):
 
     session = models.ForeignKey(Session, related_name='blocked_payment_methods')
-    method = models.CharField(max_length=50,
-        choices=constants.PAYMENT_METHODS.items())
+    method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
 
     def __unicode__(self):
         return self.method
@@ -261,7 +264,7 @@ class RecurringContract(models.Model):
         """
         Returns a dict of the contract's details.
         """
-        return { detail.key: detail.value for detail in self.details.all() }
+        return {detail.key: detail.value for detail in self.details.all()}
 
 
 class RecurringContractDetail(models.Model):
@@ -277,11 +280,9 @@ class RecurringContractDetail(models.Model):
 
 class RecurringPaymentResult(models.Model):
 
-    session = models.ForeignKey(Session,
-        related_name='recurring_payment_results')
-    psp_reference = models.PositiveIntegerField(max_length=20)
-    result_code = models.CharField(max_length=30,
-        choices=constants.RECURRING_PAYMENT_RESULT_CODES.items())
+    session = models.ForeignKey(Session, related_name='recurring_payment_results')
+    psp_reference = models.PositiveIntegerField()
+    result_code = models.CharField(max_length=30, choices=constants.RECURRING_PAYMENT_RESULT_CODES.items())
     auth_code = models.PositiveIntegerField(null=True)
     refusal_reason = models.CharField(max_length=250, blank=True)
 
@@ -338,8 +339,7 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ('-creation_time',)
-        unique_together = ('live', 'merchant_account_code', 'psp_reference',
-            'event_code', 'success')
+        unique_together = ('live', 'merchant_account_code', 'psp_reference', 'event_code', 'success')
 
     def is_valid(self):
 
@@ -351,8 +351,10 @@ class Notification(models.Model):
         valid_ip = False
 
         for allowed_ip in constants.ADYEN_SERVERS_IP_ADDRESS_RANGES:
-            if (ipaddress.ip_address(unicode(self.ip_address)) in
-                ipaddress.ip_network(unicode(allowed_ip))):
+            if (
+                ipaddress.ip_address(unicode(self.ip_address)) in
+                ipaddress.ip_network(unicode(allowed_ip))
+            ):
                 valid_ip = True
                 break
 
@@ -360,8 +362,7 @@ class Notification(models.Model):
             self.validate_errors.push(
                 'IP addres {} is not allowed'.format(self.ip_address))
 
-        required_fields = ('event_code', 'psp_reference',
-            'merchant_account_code', 'event_date', 'success')
+        required_fields = ('event_code', 'psp_reference', 'merchant_account_code', 'event_date', 'success')
 
         for f in required_fields:
             if not getattr(self, f):

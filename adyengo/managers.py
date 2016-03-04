@@ -1,7 +1,6 @@
 from django.db import models, IntegrityError
-
 from . import api
-from . import constants, settings
+from . import constants
 
 
 class RecurringContractManager(models.Manager):
@@ -50,17 +49,9 @@ class RecurringContractManager(models.Manager):
         the database and will return an empty list.
         """
 
-        request = {
-            'merchantAccount': settings.MERCHANT_ACCOUNT,
-            'shopperReference': shopper_reference,
-            'recurring': {
-                'contract': contract_type
-            }
-        }
+        result = api.list_recurring_details(shopper_reference, contract_type)
 
-        result = api.recurring_soap_client().service.listRecurringDetails(request)
-
-        if result.details:
+        if 'details' in result:
             return self._save_contracts(shopper_reference, contract_type, result)
         else:
             return []
@@ -73,23 +64,31 @@ class RecurringContractManager(models.Manager):
 
         contracts = []
 
-        for detail in result.details.RecurringDetail:
+        for contract in result.get('details'):
+
+            detail = contract.get('RecurringDetail')
+
+            if not detail:
+                continue
 
             # Adyen is too retarded to tell us what payment method type it is
             # so we'll have to find out for ourselves by checking which one is
             # filled...
 
-            for t in ('card', 'elv', 'bank'):
-                if getattr(detail, t):
-                    payment_method_type = t
+            def get_payment_method_type():
+                for t in ('card', 'elv', 'bank'):
+                    if t in detail:
+                        return t
+
+            payment_method_type = get_payment_method_type()
 
             contract = self.model(
                 shopper_reference=shopper_reference,
                 contract_type=contract_type,
-                recurring_detail_reference=detail.recurringDetailReference,
-                variant=detail.variant,
+                recurring_detail_reference=detail.get('recurringDetailReference'),
+                variant=detail.get('variant'),
                 payment_method_type=payment_method_type,
-                creation_date=detail.creationDate
+                creation_date=detail.get('creationDate')
             )
 
             try:
@@ -105,22 +104,15 @@ class RecurringContractManager(models.Manager):
             # the `RecurringContractDetail` objects that have foreign keys
             # to `RecurringContract`.
 
-            fields = getattr(detail, payment_method_type)
-
-            RecurringContractDetail = models.get_model(
-                'adyengo', 'RecurringContractDetail')
+            fields = detail[payment_method_type]
 
             for fieldname in constants.RECURRING_CONTRACT_VARIANT_FIELDS[payment_method_type]:
 
-                fieldvalue = getattr(fields, fieldname)
-
-                if fieldvalue:
-                    contract.details.add(
-                        RecurringContractDetail(
-                            recurring_contract=contract,
-                            key=fieldname,
-                            value=fieldvalue
-                        )
+                if fieldname in fields:
+                    contract.details.create(
+                        recurring_contract=contract,
+                        key=fieldname,
+                        value=fields[fieldname]
                     )
 
             contracts.append(contract)

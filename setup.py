@@ -5,7 +5,7 @@ VERSION = '0.1'
 REQUIREMENTS = (
     'ipaddress==1.0.4',
     'python-dateutil==2.1',
-    'suds==0.4',
+    'requests==2.9.1'
 )
 TEST_REQUIREMENTS = (
 )
@@ -16,8 +16,7 @@ setup(
     version=VERSION,
     author="Rik",
     author_email="gitaarik@gmail.com",
-    description="""Integrate Adyen in Django.
-    """,
+    description="Integrate Adyen in Django.",
     long_description=open('README.md', 'rt').read(),
     url="https://github.com/gitaarik/adyengo",
     packages=find_packages(),
