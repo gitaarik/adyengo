@@ -90,7 +90,7 @@ class Session(models.Model):
                 get_field_values()
             ).encode(),
             hashlib.sha256
-        ).digest()).strip()
+        ).digest()).strip().decode()
 
     def url(self):
 
