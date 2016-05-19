@@ -6,10 +6,15 @@ import ipaddress
 from collections import OrderedDict
 
 from django.db import models, IntegrityError
+from django.utils import timezone
 from django.http import HttpResponse, HttpResponseForbidden
 
 from .managers import RecurringContractManager
 from . import settings, constants, api
+
+
+def tomorrow():
+    return (timezone.now() + timezone.timedelta(days=1))
 
 
 class Session(models.Model):
@@ -22,7 +27,7 @@ class Session(models.Model):
         choices=constants.CURRENCY_CODES.items(),
         default=settings.DEFAULT_CURRENCY_CODE
     )
-    ship_before_date = models.DateTimeField(null=True)
+    ship_before_date = models.DateTimeField(null=True, default=tomorrow)
     skin_code = models.CharField(max_length=10, default=settings.DEFAULT_SKIN_CODE)
     shopper_locale = models.CharField(
         blank=True,
@@ -31,7 +36,7 @@ class Session(models.Model):
         default=settings.DEFAULT_SHOPPER_LOCALE
     )
     order_data = models.TextField(blank=True)
-    session_validity = models.DateTimeField(null=True)
+    session_validity = models.DateTimeField(null=True, default=tomorrow)
     merchant_return_data = models.CharField(max_length=128)
     country_code = models.CharField(blank=True, max_length=2, choices=constants.COUNTRY_CODES.items())
     shopper_email = models.EmailField(blank=True)
@@ -46,7 +51,11 @@ class Session(models.Model):
     )
     recurring_detail_reference = models.CharField(blank=True, max_length=80)
     res_url = models.CharField(blank=True, max_length=2000, default=settings.DEFAULT_RES_URL)
-    page_type = models.CharField(max_length=15, choices=constants.PAGE_TYPES.items())
+    page_type = models.CharField(
+        max_length=15,
+        choices=constants.PAGE_TYPES.items(),
+        default=settings.DEFAULT_PAGE_TYPE
+    )
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):

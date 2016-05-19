@@ -1,4 +1,5 @@
 from django.conf import settings
+from . import constants
 
 # Your Adyen merchant account
 MERCHANT_ACCOUNT = getattr(settings, 'ADYENGO_MERCHANT_ACCOUNT')
@@ -12,6 +13,8 @@ MODE = getattr(settings, 'ADYENGO_MODE', 'test')
 # The default skin code. This option isn't required, but if it's not set, the
 # system expects that the skin code will be provided when creating the session.
 DEFAULT_SKIN_CODE = getattr(settings, 'ADYENGO_DEFAULT_SKIN_CODE', None)
+
+DEFAULT_PAGE_TYPE = getattr(settings, 'ADYENGO_DEFAULT_PAGE_TYPE', constants.PAGE_TYPE_MULTIPLE)
 
 # The default shopper locale. This option isn't required, but if it's not set, the
 # system expects that the skin code will be provided when creating the session.
