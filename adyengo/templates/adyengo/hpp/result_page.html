@@ -1,0 +1,27 @@
+{% extends "adyengo/base.html" %}
+
+{% block content %}
+
+    <h2>Result page</h2>
+
+    <p>
+        The merchantSig is:
+        {% if merchant_sig_valid %}
+            <b style="color: green;">valid</b>
+        {% else %}
+            <b style="color: red;">invalid</b>
+        {% endif %}
+    </p>
+
+    <table>
+        {% for key, value in params.items %}
+            <tr>
+                <th>{{ key }}</th>
+                <td>{{ value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <a href="{% url 'adyengo:hpp_setup_session' %}">New test</a>
+
+{% endblock %}

@@ -1,15 +1,11 @@
-import binascii
-import base64
-import hmac
-import hashlib
 import ipaddress
-from collections import OrderedDict
 
 from django.db import models, IntegrityError
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseForbidden
 
 from .managers import RecurringContractManager
+from .utils import merchant_sig
 from . import settings, constants, api
 
 
@@ -73,25 +69,6 @@ class Session(models.Model):
     def is_api_recurring(self):
         return self.session_type == constants.SESSION_TYPE_API_RECURRING
 
-    def merchant_sig(self, params):
-
-        params = OrderedDict(sorted(params.items()))
-
-        def get_field_values():
-            return [
-                str(value).replace(r'\\', r'\\\\').replace(r':', r'\:')
-                for value in params.values()
-            ]
-
-        return base64.encodestring(hmac.new(
-            binascii.a2b_hex(settings.HMAC_KEY),
-            ':'.join(
-                list(params.keys()) +
-                get_field_values()
-            ).encode(),
-            hashlib.sha256
-        ).digest()).strip().decode()
-
     def url(self):
 
         if self.page_type == constants.PAGE_TYPE_MULTIPLE:
@@ -112,32 +89,17 @@ class Session(models.Model):
             'shipBeforeDate': self.ship_before_date.isoformat(),
             'skinCode': self.skin_code,
             'merchantAccount': settings.MERCHANT_ACCOUNT,
+            'shopperLocale': self.shopper_locale,
+            'orderData': self.order_data,
             'sessionValidity': self.session_validity.isoformat(),
+            'merchantReturnData': self.merchant_return_data,
+            'countryCode': self.country_code,
+            'shopperEmail': self.shopper_email,
+            'shopperReference': self.shopper_reference,
+            'recurringContract': self.recurring_contract,
+            'selectedRecurringDetailReference': self.recurring_detail_reference,
+            'resURL': self.res_url
         }
-
-        if self.shopper_locale:
-            params['shopperLocale'] = self.shopper_locale
-
-        if self.order_data:
-            params['orderData'] = self.order_data
-
-        if self.merchant_return_data:
-            params['merchantReturnData'] = self.merchant_return_data
-
-        if self.country_code:
-            params['countryCode'] = self.country_code
-
-        if self.shopper_email:
-            params['shopperEmail'] = self.shopper_email
-
-        if self.shopper_reference:
-            params['shopperReference'] = self.shopper_reference
-
-        if self.recurring_contract:
-            params['recurringContract'] = self.recurring_contract
-
-        if self.recurring_detail_reference:
-            params['selectedRecurringDetailReference'] = self.recurring_detail_reference
 
         if self.allowed_payment_methods.count():
             params['allowedMethods'] = ','.join([
@@ -152,10 +114,7 @@ class Session(models.Model):
         if self.page_type == constants.PAGE_TYPE_SKIP:
             params['brandCode'] = params['allowedMethods']
 
-        if self.res_url:
-            params['resURL'] = self.res_url
-
-        params['merchantSig'] = self.merchant_sig(params)
+        params['merchantSig'] = merchant_sig(params)
 
         return params
 
@@ -369,7 +328,8 @@ class Notification(models.Model):
 
         if not valid_ip:
             self.validate_errors.push(
-                'IP addres {} is not allowed'.format(self.ip_address))
+                'IP addres {} is not allowed'.format(self.ip_address)
+            )
 
         required_fields = ('event_code', 'psp_reference', 'merchant_account_code', 'event_date', 'success')
 
@@ -395,7 +355,6 @@ class Notification(models.Model):
         return self.valid
 
     def is_status(self, status_code):
-
         return (
             self.is_valid() and
             self.success and

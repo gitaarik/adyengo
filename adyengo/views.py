@@ -29,7 +29,7 @@ def hpp_setup_session(request, session_type):
         'shopper_locale': settings.DEFAULT_SHOPPER_LOCALE,
         'skin_code': settings.DEFAULT_SKIN_CODE,
         'shopper_reference': uuid.uuid4(),
-        'res_url': settings.DEFAULT_RES_URL or 'http://{}{}'.format(request.get_host(), request.path)
+        'res_url': '{}://{}{}'.format(request.scheme, request.get_host(), reverse('adyengo:hpp_result_page'))
     }
 
     return render(request, 'adyengo/hpp/setup_session.html', {
@@ -83,6 +83,29 @@ def hpp_dispatch_session(request):
     return render(request, 'adyengo/hpp/dispatch_session.html', {
         'url': session.url(),
         'params': session.hpp_params()
+    })
+
+
+def hpp_result_page(request):
+
+    def p(p):
+        return request.GET.get(p)
+
+    params = {
+        'authResult': p('authResult'),
+        'merchantReference': p('merchantReference'),
+        'merchantReturnData': p('merchantReturnData'),
+        'paymentMethod': p('paymentMethod'),
+        'pspReference': p('pspReference'),
+        'shopperLocale': p('shopperLocale'),
+        'skinCode': p('skinCode')
+    }
+
+    merchant_sig_valid = utils.merchant_sig(params) == p('merchantSig')
+
+    return render(request, 'adyengo/hpp/result_page.html', {
+        'merchant_sig_valid': merchant_sig_valid,
+        'params': params
     })
 
 
