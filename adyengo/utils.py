@@ -6,16 +6,37 @@ from collections import OrderedDict
 from . import settings
 
 
-def merchant_sig(params):
+def merchant_sig(params, clean_params=True):
 
-    def get_non_empty_params(params):
-        return [
-            (key, value)
+    def clean_params(params):
+
+        valid_params = (
+            'allowedMethods', 'authResult', 'blockedMethods', 'brandCode',
+            'countryCode', 'currencyCode', 'currencyCode', 'merchantAccount',
+            'merchantReference', 'merchantReturnData', 'orderData',
+            'paymentAmount', 'paymentMethod', 'pspReference',
+            'recurringContract', 'resURL', 'selectedRecurringDetailReference',
+            'sessionValidity', 'shipBeforeDate', 'shopperEmail',
+            'shopperLocale', 'shopperReference', 'skinCode'
+        )
+
+        return {
+            key: value
+            for key, value in params.items()
+            if key in valid_params
+        }
+
+    def remove_empty_values(params):
+        return {
+            key: value
             for key, value in params.items()
             if value is not None
-        ]
+        }
 
-    params = OrderedDict(sorted(get_non_empty_params(params)))
+    if clean_params:
+        params = clean_params(params)
+
+    params = OrderedDict(sorted(remove_empty_values(params).items()))
 
     def get_field_values():
         return [
@@ -23,6 +44,7 @@ def merchant_sig(params):
             for value in params.values()
         ]
 
+    # this works
     return base64.encodestring(hmac.new(
         binascii.a2b_hex(settings.HMAC_KEY),
         ':'.join(
