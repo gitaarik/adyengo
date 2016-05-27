@@ -8,7 +8,9 @@ from .utils import is_valid_ip, get_client_ip, is_notification_item_hmac_valid
 
 def parse_notification(request):
 
-    if not is_valid_ip(get_client_ip(request)):
+    client_ip = get_client_ip(request)
+
+    if not is_valid_ip(client_ip):
         return False
 
     data = json.loads(request.body.decode())
@@ -31,6 +33,7 @@ def parse_notification(request):
         amount = item.get('amount', {})
 
         n = Notification(
+            ip_address=client_ip,
             live=data.get('live'),
             event_code=item.get('eventCode'),
             psp_reference=item.get('pspReference'),
