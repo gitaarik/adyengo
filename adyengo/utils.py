@@ -49,7 +49,7 @@ def merchant_sig(params, clean_params=True):
 
 def calc_hmac(string, hmac_key=settings.HMAC_KEY):
     return base64.encodestring(hmac.new(
-        binascii.a2b_hex(settings.HMAC_KEY),
+        binascii.a2b_hex(hmac_key),
         string,
         hashlib.sha256
     ).digest()).strip().decode()
@@ -95,8 +95,5 @@ def get_client_ip(request):
 
 def is_valid_ip(ip_address):
     for allowed_ip in constants.ADYEN_SERVERS_IP_ADDRESS_RANGES:
-        if (
-            ipaddress.ip_address(ip_address) in
-            ipaddress.ip_network(allowed_ip)
-        ):
+        if ipaddress.ip_address(ip_address) in ipaddress.ip_network(allowed_ip):
             return True
