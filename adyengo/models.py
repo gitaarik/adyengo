@@ -51,7 +51,7 @@ class Session(models.Model):
     )
     creation_time = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return unicode(self.merchant_reference)
 
     class Meta:
@@ -192,7 +192,7 @@ class SessionAllowedPaymentMethods(models.Model):
     session = models.ForeignKey(Session, related_name='allowed_payment_methods')
     method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
 
-    def __unicode__(self):
+    def __str__(self):
         return self.method
 
 
@@ -201,7 +201,7 @@ class SessionBlockedPaymentMethods(models.Model):
     session = models.ForeignKey(Session, related_name='blocked_payment_methods')
     method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
 
-    def __unicode__(self):
+    def __str__(self):
         return self.method
 
 
@@ -217,7 +217,7 @@ class RecurringContract(models.Model):
 
     objects = RecurringContractManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.recurring_detail_reference
 
     class Meta:
@@ -239,7 +239,7 @@ class RecurringContractDetail(models.Model):
     key = models.CharField(max_length=100)
     value = models.CharField(blank=True, max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.key
 
 
@@ -284,7 +284,7 @@ class Notification(models.Model):
     session = models.ForeignKey(Session, null=True, blank=True)
     creation_time = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u'{} {}'.format(self.event_code, self.psp_reference)
 
     def save(self, *args, **kwargs):
