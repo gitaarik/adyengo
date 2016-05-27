@@ -49,8 +49,8 @@ def merchant_sig(params, clean_params=True):
 
 def calc_hmac(string, hmac_key=settings.HMAC_KEY):
     return base64.encodestring(hmac.new(
-        binascii.a2b_hex(hmac_key),
-        string,
+        binascii.a2b_hex(hmac_key.encode()),
+        string.encode(),
         hashlib.sha256
     ).digest()).strip().decode()
 
