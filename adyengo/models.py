@@ -52,7 +52,7 @@ class Session(models.Model):
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return unicode(self.merchant_reference)
+        return self.merchant_reference
 
     class Meta:
         ordering = ('-creation_time',)
@@ -285,7 +285,7 @@ class Notification(models.Model):
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return u'{} {}'.format(self.event_code, self.psp_reference)
+        return '{} {}'.format(self.event_code, self.psp_reference)
 
     def save(self, *args, **kwargs):
 
