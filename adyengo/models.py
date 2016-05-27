@@ -1,8 +1,5 @@
-import ipaddress
-
-from django.db import models, IntegrityError
+from django.db import models
 from django.utils import timezone
-from django.http import HttpResponse, HttpResponseForbidden
 
 from .managers import RecurringContractManager
 from .utils import merchant_sig
@@ -275,11 +272,15 @@ class Notification(models.Model):
     merchant_account_code = models.CharField(blank=True, max_length=150)
     event_date = models.DateTimeField(blank=True)
     success = models.BooleanField()
-    payment_method = models.CharField(blank=True, max_length=50)
+    payment_method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items(), blank=True)
     operations = models.CharField(blank=True, max_length=100)
     reason = models.CharField(blank=True, max_length=250)
-    amount = models.CharField(blank=True, max_length=15)
-    valid = models.NullBooleanField()
+    payment_amount = models.PositiveSmallIntegerField()
+    currency_code = models.CharField(
+        max_length=3,
+        choices=constants.CURRENCY_CODES.items(),
+        default=settings.DEFAULT_CURRENCY_CODE
+    )
     session = models.ForeignKey(Session, null=True)
     creation_time = models.DateTimeField(auto_now_add=True)
 
@@ -309,54 +310,8 @@ class Notification(models.Model):
         ordering = ('-creation_time',)
         unique_together = ('live', 'merchant_account_code', 'psp_reference', 'event_code', 'success')
 
-    def is_valid(self):
-
-        if self.valid is not None:
-            return self.valid
-
-        self.validate_errors = []
-
-        valid_ip = False
-
-        for allowed_ip in constants.ADYEN_SERVERS_IP_ADDRESS_RANGES:
-            if (
-                ipaddress.ip_address(unicode(self.ip_address)) in
-                ipaddress.ip_network(unicode(allowed_ip))
-            ):
-                valid_ip = True
-                break
-
-        if not valid_ip:
-            self.validate_errors.push(
-                'IP addres {} is not allowed'.format(self.ip_address)
-            )
-
-        required_fields = ('event_code', 'psp_reference', 'merchant_account_code', 'event_date', 'success')
-
-        for f in required_fields:
-            if not getattr(self, f):
-                self.validate_errors.push('{} is empty'.format(f))
-
-        if len(self.validate_errors) == 0:
-            self.valid = True
-        else:
-            self.valid = False
-
-        try:
-            self.save()
-        except IntegrityError:
-            # Adyen notificatins are likely to be sent twice. Because of the
-            # uniqueness on our fields, an `IntegrityError` is raised when the
-            # same notification is trying to be inserted in the model. In this
-            # case, we can ignore the notification (because we already
-            # processed it).
-            pass
-
-        return self.valid
-
     def is_status(self, status_code):
         return (
-            self.is_valid() and
             self.success and
             self.event_code == status_code
         )
@@ -402,9 +357,3 @@ class Notification(models.Model):
 
     def is_report_available(self):
         return self.is_status(constants.NOTIFICATION_EVENT_CODE_REPORT_AVAILABLE)
-
-    def response(self):
-        if self.is_valid():
-            return HttpResponse('[accepted]')
-        else:
-            return HttpResponseForbidden()

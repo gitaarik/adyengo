@@ -1,34 +1,44 @@
 from django.conf import settings
 from . import constants
 
+
+adyengo_settings = getattr(settings, 'ADYENGO', {})
+
 # Your Adyen merchant account
-MERCHANT_ACCOUNT = getattr(settings, 'ADYENGO_MERCHANT_ACCOUNT')
+MERCHANT_ACCOUNT = getattr(adyengo_settings, 'MERCHANT_ACCOUNT', None)
 
 # The HMAC key used to validate the communication with Adyen
-HMAC_KEY = getattr(settings, 'ADYENGO_HMAC_KEY')
+HMAC_KEY = getattr(adyengo_settings, 'HMAC_KEY', None)
+
+# The HMAC key used to validate notifications from Adyen
+NOTIFICATION_HMAC_KEY = getattr(adyengo_settings, 'NOTIFICATION_HMAC_KEY', None)
 
 # The mode the Adyen app will work in, either 'test' or 'live'
-MODE = getattr(settings, 'ADYENGO_MODE', 'test')
+MODE = getattr(adyengo_settings, 'MODE', 'test')
 
 # The default skin code. This option isn't required, but if it's not set, the
 # system expects that the skin code will be provided when creating the session.
-DEFAULT_SKIN_CODE = getattr(settings, 'ADYENGO_DEFAULT_SKIN_CODE', None)
+DEFAULT_SKIN_CODE = getattr(adyengo_settings, 'DEFAULT_SKIN_CODE', None)
 
-DEFAULT_PAGE_TYPE = getattr(settings, 'ADYENGO_DEFAULT_PAGE_TYPE', constants.PAGE_TYPE_MULTIPLE)
+# The default page type for an Adyen HPP (Hosted Payment Pages) payment
+DEFAULT_PAGE_TYPE = getattr(adyengo_settings, 'DEFAULT_PAGE_TYPE', constants.PAGE_TYPE_MULTIPLE)
 
 # The default shopper locale. This option isn't required, but if it's not set, the
 # system expects that the skin code will be provided when creating the session.
-DEFAULT_SHOPPER_LOCALE = getattr(settings, 'ADYENGO_DEFAULT_SHOPPER_LOCALE', None)
+DEFAULT_SHOPPER_LOCALE = getattr(adyengo_settings, 'DEFAULT_SHOPPER_LOCALE', None)
 
 # The default currency code. This option isn't required, but if it's not set,
 # the system expects that the currency code will be provided when creating the
 # session.
-DEFAULT_CURRENCY_CODE = getattr(settings, 'ADYENGO_DEFAULT_CURRENCY_CODE', None)
+DEFAULT_CURRENCY_CODE = getattr(adyengo_settings, 'DEFAULT_CURRENCY_CODE', None)
 
-DEFAULT_RES_URL = ''
+# The default URL the user gets redirected to after an Adyen HPP (Hosted
+# Payment Pages) payment.
+DEFAULT_RES_URL = getattr(adyengo_settings, 'DEFAULT_RES_URL', None)
 
-API_USERNAME = getattr(settings, 'ADYENGO_API_USERNAME', None)
-API_PASSWORD = getattr(settings, 'ADYENGO_API_PASSWORD', None)
+# The credentials for the Adyen API
+API_USERNAME = getattr(adyengo_settings, 'API_USERNAME', None)
+API_PASSWORD = getattr(adyengo_settings, 'API_PASSWORD', None)
 
 if MODE == 'test':
     PAYMENT_PAGES_MULTIPLE_URL = 'https://test.adyen.com/hpp/select.shtml'

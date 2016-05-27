@@ -8,9 +8,9 @@ from django.core.urlresolvers import reverse
 
 from .models import (
     Session, SessionAllowedPaymentMethods, SessionBlockedPaymentMethods,
-    Notification, RecurringContract
+    RecurringContract
 )
-from . import constants, settings, utils
+from . import constants, settings, utils, notification
 
 
 def hpp_setup_session(request, session_type):
@@ -174,32 +174,7 @@ def api_execute_recurring_session(request):
 
 @csrf_exempt
 def parse_notification(request):
-
-    def p(p):
-        # Get request parameter
-        return request.REQUEST.get(p, '')
-
-    n = Notification(
-        ip_address=utils.get_client_ip(request),
-        live=p('live'),
-        event_code=p('eventCode'),
-        psp_reference=p('pspReference'),
-        original_reference=p('originalReference'),
-        merchant_reference=p('merchantReference'),
-        merchant_account_code=p('merchantAccountCode'),
-        event_date=p('eventDate'),
-        success=p('success'),
-        payment_method=p('paymentMethod'),
-        operations=p('operations'),
-        reason=p('reason'),
-        amount=p('amount')
-    )
-
-    if n.is_authorized():
-        # authorized!
-        pass
+    if notification.parse_notification(request):
+        return notification.notification_valid_response()
     else:
-        # not authorized...
-        pass
-
-    return n.response()
+        return notification.notification_invalid_response()

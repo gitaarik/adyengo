@@ -1,8 +1,10 @@
 from django.core import urlresolvers
 from django.contrib import admin
-from .models import (Session, SessionAllowedPaymentMethods,
-    SessionBlockedPaymentMethods, Notification, RecurringContract,
-    RecurringContractDetail, RecurringPaymentResult)
+from .models import (
+    Session, SessionAllowedPaymentMethods, SessionBlockedPaymentMethods,
+    Notification, RecurringContract, RecurringContractDetail,
+    RecurringPaymentResult
+)
 
 
 class SessionAllowedPaymentMethodsInline(admin.TabularInline):
@@ -27,9 +29,11 @@ class RecurringPaymentResultInline(admin.TabularInline):
 
 class SessionAdmin(admin.ModelAdmin):
 
-    list_display = ('session_type', 'page_type', 'merchant_reference',
-        'payment_amount', 'currency_code', 'shopper_locale',
-        'shopper_reference', 'recurring_contract', 'creation_time')
+    list_display = (
+        'session_type', 'page_type', 'merchant_reference', 'payment_amount',
+        'currency_code', 'shopper_locale', 'shopper_reference',
+        'recurring_contract', 'creation_time'
+    )
 
     inlines = (
         SessionAllowedPaymentMethodsInline,
@@ -41,9 +45,11 @@ class SessionAdmin(admin.ModelAdmin):
 
 class NotificationAdmin(admin.ModelAdmin):
 
-    list_display = ('event_code', 'psp_reference', 'live',
-        'merchant_account_code', 'amount', 'success', 'event_date',
-        'session', 'valid', 'creation_time')
+    list_display = (
+        'event_code', 'psp_reference', 'live', 'merchant_account_code',
+        'payment_amount', 'currency_code', 'success', 'event_date', 'session',
+        'creation_time'
+    )
     readonly_fields = ('session_link',)
 
     def session_link(self, instance):
@@ -68,8 +74,10 @@ class RecurringContractDetailInline(admin.TabularInline):
 
 
 class RecurringContractAdmin(admin.ModelAdmin):
-    list_display = ('recurring_detail_reference', 'shopper_reference',
-        'contract_type', 'payment_method_type', 'variant', 'creation_date')
+    list_display = (
+        'recurring_detail_reference', 'shopper_reference', 'contract_type',
+        'payment_method_type', 'variant', 'creation_date'
+    )
     inlines = (RecurringContractDetailInline,)
 
 

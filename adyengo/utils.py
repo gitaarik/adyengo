@@ -1,9 +1,10 @@
-import binascii
 import base64
-import hmac
+import binascii
 import hashlib
+import hmac
+import ipaddress
 from collections import OrderedDict
-from . import settings
+from . import settings, constants
 
 
 def merchant_sig(params, clean_params=True):
@@ -38,21 +39,49 @@ def merchant_sig(params, clean_params=True):
 
     params = OrderedDict(sorted(remove_empty_values(params).items()))
 
-    def get_field_values():
-        return [
-            str(value).replace(r'\\', r'\\\\').replace(r':', r'\:')
-            for value in params.values()
-        ]
-
-    # this works
-    return base64.encodestring(hmac.new(
-        binascii.a2b_hex(settings.HMAC_KEY),
+    return calc_hmac(
         ':'.join(
             list(params.keys()) +
-            get_field_values()
-        ).encode(),
+            escape_values(params.values())
+        ).encode()
+    )
+
+
+def calc_hmac(string, hmac_key=settings.HMAC_KEY):
+    return base64.encodestring(hmac.new(
+        binascii.a2b_hex(settings.HMAC_KEY),
+        string,
         hashlib.sha256
     ).digest()).strip().decode()
+
+
+def escape_values(values):
+    return [
+        str(value).replace(r'\\', r'\\\\').replace(r':', r'\:')
+        for value in values
+    ]
+
+
+def is_notification_item_hmac_valid(item):
+
+    hmac_values = (
+        item.get('pspReference', ''),
+        item.get('originalReference', ''),
+        item.get('merchantAccountCode', ''),
+        item.get('merchantReference', ''),
+        item.get('amount', {}).get('value', ''),
+        item.get('amount', {}).get('currency', ''),
+        item.get('eventCode'),
+        item.get('success'),
+    )
+
+    hmac_signature = item.get('additionalData', {}).get('hmacSignature')
+
+    if hmac_signature and hmac_signature == calc_hmac(
+        ':'.join(escape_values(hmac_values)),
+        settings.NOTIFICATION_HMAC_KEY
+    ):
+        return True
 
 
 def get_client_ip(request):
@@ -62,3 +91,12 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+def is_valid_ip(ip_address):
+    for allowed_ip in constants.ADYEN_SERVERS_IP_ADDRESS_RANGES:
+        if (
+            ipaddress.ip_address(ip_address) in
+            ipaddress.ip_network(allowed_ip)
+        ):
+            return True
