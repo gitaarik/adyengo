@@ -11,7 +11,7 @@ def parse_notification(request):
     if not is_valid_ip(get_client_ip(request)):
         return False
 
-    data = json.loads(request.body)
+    data = json.loads(request.body.decode())
 
     for item in data.get('notificationItems', []):
 
