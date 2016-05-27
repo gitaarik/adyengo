@@ -13,7 +13,13 @@ def parse_notification(request):
 
     data = json.loads(request.body.decode())
 
-    for item in data.get('notificationItems', []):
+    def get_notification_items(data):
+        return [
+            i['NotificationRequestItem']
+            for i in data.get('notificationItems', [])
+        ]
+
+    for item in get_notification_items(data):
 
         if not is_notification_item_hmac_valid(item):
             return False
