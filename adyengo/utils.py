@@ -43,7 +43,7 @@ def merchant_sig(params, clean_params=True):
         ':'.join(
             list(params.keys()) +
             escape_values(params.values())
-        ).encode()
+        )
     )
 
 
