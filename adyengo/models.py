@@ -263,25 +263,25 @@ class RecurringPaymentResult(models.Model):
 
 class Notification(models.Model):
 
-    ip_address = models.CharField(max_length=45)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
     live = models.BooleanField()
-    event_code = models.CharField(blank=True, max_length=50)
-    psp_reference = models.CharField(blank=True, max_length=150)
-    original_reference = models.CharField(blank=True, max_length=150)
-    merchant_reference = models.CharField(blank=True, max_length=128)
-    merchant_account_code = models.CharField(blank=True, max_length=150)
-    event_date = models.DateTimeField(blank=True)
+    event_code = models.CharField(max_length=50, null=True, blank=True)
+    psp_reference = models.CharField(max_length=150, null=True, blank=True)
+    original_reference = models.CharField(max_length=150, null=True, blank=True)
+    merchant_reference = models.CharField(max_length=128, null=True, blank=True)
+    merchant_account_code = models.CharField(max_length=150, null=True, blank=True)
+    event_date = models.DateTimeField(null=True, blank=True)
     success = models.BooleanField()
-    payment_method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items(), blank=True)
-    operations = models.CharField(blank=True, max_length=100)
-    reason = models.CharField(blank=True, max_length=250)
+    payment_method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items(), null=True, blank=True)
+    operations = models.CharField(max_length=100, null=True, blank=True)
+    reason = models.CharField(max_length=250, null=True, blank=True)
     payment_amount = models.PositiveSmallIntegerField()
     currency_code = models.CharField(
         max_length=3,
         choices=constants.CURRENCY_CODES.items(),
         default=settings.DEFAULT_CURRENCY_CODE
     )
-    session = models.ForeignKey(Session, null=True)
+    session = models.ForeignKey(Session, null=True, blank=True)
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
