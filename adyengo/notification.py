@@ -55,7 +55,7 @@ def parse_notification(request):
 
     try:
         return [
-            save_notification_item()
+            save_notification_item(item)
             for item in get_notification_items(
                 json.loads(request.body.decode())
             )
