@@ -4,41 +4,58 @@
 
     <h2>Request recurring contracts</h2>
 
-    {% for contract in contracts %}
+    {% if contracts %}
 
-        <table>
-            <tr>
-                <th>Recurring detail reference</th>
-                <td>{{ contract.recurring_detail_reference }}</td>
-            </tr>
-            <tr>
-                <th>Variant</th>
-                <td>{{ contract.variant }}</td>
-            </tr>
-            <tr>
-                <th>Creation date</th>
-                <td>{{ contract.creation_date }}</td>
-            </tr>
-            <tr>
-                <th>Payment method type</th>
-                <td>{{ contract.payment_method_type }}</td>
-            </tr>
-            <tr>
-                <td colspan="2"><h3>Details:</h3></td>
-            </tr>
+        {% for contract in contracts %}
 
-            {% for key, value in contract.details_dict.items %}
+            <table>
                 <tr>
-                    <th>{{ key }}</th>
-                    <td>{{ value }}</td>
+                    <th>Recurring detail reference</th>
+                    <td>{{ contract.recurring_detail_reference }}</td>
                 </tr>
-            {% endfor %}
-        </table>
+                <tr>
+                    <th>Variant</th>
+                    <td>{{ contract.variant }}</td>
+                </tr>
+                <tr>
+                    <th>Creation date</th>
+                    <td>{{ contract.creation_date }}</td>
+                </tr>
+                <tr>
+                    <th>Payment method type</th>
+                    <td>{{ contract.payment_method_type }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"><h3>Details:</h3></td>
+                </tr>
 
-        {% if not forloop.last %}
-            <hr>
-        {% endif %}
+                {% for key, value in contract.details_dict.items %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
 
-    {% endfor %}
+            {% if not forloop.last %}
+                <hr>
+            {% endif %}
+
+        {% endfor %}
+
+    {% else %}
+
+        <h3>No contracts found.</h3>
+
+        <p>
+            Note that when you just created the contract, it might take a while
+            before the contracts are returned from the Adyen API, because Adyen
+            holds a cache that might not have been updated yet. This could take
+            from several minutes up to several hours.
+        </p>
+
+        <input type="button" onclick="javascript:window.location.reload();" value="Retry">
+
+    {% endif %}
 
 {% endblock %}

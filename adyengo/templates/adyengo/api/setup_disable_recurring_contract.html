@@ -1,0 +1,27 @@
+{% extends "adyengo/base.html" %}
+
+{% block content %}
+
+    <h2>Disable recurring contract</h2>
+
+    <form method="POST" action="{{ execute_url }}">
+
+        {% csrf_token %}
+
+        <table>
+            <tr>
+                <th>Shopper reference</th>
+                <td><input type="text" name="shopper_reference"></td>
+            </tr>
+            <tr>
+                <th>Recurring detail reference</th>
+                <td><input type="text" name="recurring_detail_reference"></td>
+            </tr>
+        </table>
+
+        <input type="submit" value="Execute">
+
+    </form>
+
+{% endblock %}
+

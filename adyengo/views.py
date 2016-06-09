@@ -127,6 +127,24 @@ def api_execute_request_contracts(request):
     })
 
 
+def api_setup_disable_recurring_contract(request):
+    return render(request, 'adyengo/api/setup_disable_recurring_contract.html', {
+        'execute_url': reverse('adyengo:api_execute_disable_recurring_contract')
+    })
+
+
+def api_execute_disable_recurring_contract(request):
+
+    success = RecurringContract.objects.disable(
+        request.POST.get('shopper_reference'),
+        request.POST.get('recurring_detail_reference')
+    )
+
+    return render(request, 'adyengo/api/execute_disable_recurring_contract.html', {
+        'success': success
+    })
+
+
 def api_setup_recurring_session(request):
 
     params = {

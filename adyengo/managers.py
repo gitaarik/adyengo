@@ -1,4 +1,4 @@
-from django.db import models, IntegrityError
+from django.db import models
 from . import api
 from . import constants
 
@@ -23,6 +23,20 @@ class RecurringContractManager(models.Manager):
             return contracts
         else:
             return self._fetch_contracts(shopper_reference, contract_type)
+
+    def disable(self, shopper_reference, recurring_detail_reference):
+
+        response = api.disable_recurring_details(shopper_reference, recurring_detail_reference)
+
+        if response.get('response') == '[detail-successfully-disabled]':
+            try:
+                self.filter(
+                    shopper_reference=shopper_reference,
+                    recurring_detail_reference=recurring_detail_reference
+                ).delete()
+            except:
+                pass
+            return True
 
     def flush_cache(self, shopper_reference, contract_type):
         """
@@ -66,55 +80,55 @@ class RecurringContractManager(models.Manager):
 
         for contract in result.get('details'):
 
-            detail = contract.get('RecurringDetail')
+            recurring_detail = contract.get('RecurringDetail')
 
-            if not detail:
+            if not recurring_detail:
                 continue
 
-            # Adyen is too retarded to tell us what payment method type it is
-            # so we'll have to find out for ourselves by checking which one is
-            # filled...
-
-            def get_payment_method_type():
-                for t in ('card', 'elv', 'bank'):
-                    if t in detail:
-                        return t
-
-            payment_method_type = get_payment_method_type()
-
-            contract = self.model(
-                shopper_reference=shopper_reference,
-                contract_type=contract_type,
-                recurring_detail_reference=detail.get('recurringDetailReference'),
-                variant=detail.get('variant'),
-                payment_method_type=payment_method_type,
-                creation_date=detail.get('creationDate')
+            contracts.append(
+                self._save_contract(
+                    shopper_reference,
+                    contract_type,
+                    recurring_detail
+                )
             )
 
-            try:
-                contract.save()
-            except IntegrityError:
-                # Because of race conditions, it is possible that the contract
-                # already exists. If so, the model will throw an
-                # `IntegrityError`. In this case we'll skip inserting this
-                # contract because we already have it.
-                continue
-
-            # Each payment method type has different fields, we save these in
-            # the `RecurringContractDetail` objects that have foreign keys
-            # to `RecurringContract`.
-
-            fields = detail[payment_method_type]
-
-            for fieldname in constants.RECURRING_CONTRACT_VARIANT_FIELDS[payment_method_type]:
-
-                if fieldname in fields:
-                    contract.details.create(
-                        recurring_contract=contract,
-                        key=fieldname,
-                        value=fields[fieldname]
-                    )
-
-            contracts.append(contract)
-
         return contracts
+
+    def _save_contract(self, shopper_reference, contract_type, data):
+
+        def get_payment_method_type():
+            # The API is too retarded to tell us what payment method type
+            # it is so we'll have to find out for ourselves by checking
+            # which one is filled...
+            for t in ('card', 'elv', 'bank'):
+                if t in data:
+                    return t
+
+        payment_method_type = get_payment_method_type()
+
+        contract, created = self.get_or_create(
+            shopper_reference=shopper_reference,
+            contract_type=contract_type,
+            recurring_detail_reference=data.get('recurringDetailReference'),
+            variant=data.get('variant'),
+            payment_method_type=payment_method_type,
+            creation_date=data.get('creationDate')
+        )
+
+        # Each payment method type has different fields, we save these in
+        # the `RecurringContractDetail` objects that have foreign keys
+        # to `RecurringContract`.
+
+        fields = data[payment_method_type]
+
+        for fieldname in constants.RECURRING_CONTRACT_VARIANT_FIELDS[payment_method_type]:
+
+            if fieldname in fields:
+                contract.details.create(
+                    recurring_contract=contract,
+                    key=fieldname,
+                    value=fields[fieldname]
+                )
+
+        return contract

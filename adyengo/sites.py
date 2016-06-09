@@ -31,6 +31,18 @@ class AdyengoSite(object):
                 views.api_execute_request_contracts,
                 name='api_execute_request_contracts'
             ),
+
+            url(
+                r'^api/setup_disable_recurring_contract/$',
+                views.api_setup_disable_recurring_contract,
+                name='api_setup_disable_recurring_contract'
+            ),
+            url(
+                r'^api/execute_disable_recurring_contract/$',
+                views.api_execute_disable_recurring_contract,
+                name='api_execute_disable_recurring_contract'
+            ),
+
             url(
                 r'^api/setup_recurring_session/$',
                 views.api_setup_recurring_session,
@@ -43,7 +55,6 @@ class AdyengoSite(object):
             ),
 
             url(r'^notification/$', views.parse_notification, name='parse_notification')
-
         ]
 
         return urlpatterns, 'adyengo', 'adyengo'

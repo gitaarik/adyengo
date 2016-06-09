@@ -53,6 +53,8 @@
 
         {% csrf_token %}
 
+        <h2>Normal session</h2>
+
         <h2>Type:</h2>
         <select name="session_type">
             <option value="{{ session_type_hpp_regular }}" {% if session_type_hpp_regular == session_type %} selected="selected"{% endif %}>Regular</option>

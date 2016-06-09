@@ -16,7 +16,7 @@ def exec_recurring_payment(
         'authorise',
         {
             'amount': {
-                'value': payment_amount,
+                'value': int(payment_amount),
                 'currency': currency_code
             },
             'reference': merchant_reference,
@@ -41,6 +41,17 @@ def list_recurring_details(shopper_reference, contract_type):
                 'contract': contract_type
             },
             'shopperReference': shopper_reference
+        }
+    )
+
+
+def disable_recurring_details(shopper_reference, recurring_detail_reference):
+    return recurring_api_request(
+        'disable',
+        {
+            'merchantAccount': settings.MERCHANT_ACCOUNT,
+            'shopperReference': shopper_reference,
+            'recurringDetailReference': recurring_detail_reference
         }
     )
 

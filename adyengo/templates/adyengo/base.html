@@ -44,6 +44,14 @@
                 width: 500px;
             }
 
+            .menu ul {
+                display: flex;
+            }
+
+            .menu ul li {
+                margin-right: 15px;
+            }
+
         </style>
 
     </head>
@@ -51,6 +59,15 @@
     <body>
 
         <h1>Adyengo Testpages</h1>
+
+        <nav class="menu">
+            <ul>
+                <li><a href="{% url 'adyengo:hpp_setup_session' %}">Normal session</a></li>
+                <li><a href="{% url 'adyengo:api_setup_request_contracts' %}">Request recurring contracts</a></li>
+                <li><a href="{% url 'adyengo:api_setup_disable_recurring_contract' %}">Disable recurring contract</a></li>
+                <li><a href="{% url 'adyengo:api_setup_recurring_session' %}">Recurring payment session</a></li>
+            </ul>
+        </nav>
 
         {% block content %}{% endblock %}
 

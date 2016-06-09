@@ -20,30 +20,30 @@ class Session(models.Model):
         choices=constants.CURRENCY_CODES.items(),
         default=settings.DEFAULT_CURRENCY_CODE
     )
-    ship_before_date = models.DateTimeField(null=True, default=tomorrow)
+    ship_before_date = models.DateTimeField(default=tomorrow, null=True)
     skin_code = models.CharField(max_length=10, default=settings.DEFAULT_SKIN_CODE)
     shopper_locale = models.CharField(
-        blank=True,
         max_length=5,
         choices=constants.LOCALES.items(),
-        default=settings.DEFAULT_SHOPPER_LOCALE
+        default=settings.DEFAULT_SHOPPER_LOCALE,
+        blank=True
     )
     order_data = models.TextField(blank=True)
-    session_validity = models.DateTimeField(null=True, default=tomorrow)
+    session_validity = models.DateTimeField(default=tomorrow, null=True)
     merchant_return_data = models.CharField(max_length=128)
-    country_code = models.CharField(blank=True, max_length=2, choices=constants.COUNTRY_CODES.items())
+    country_code = models.CharField(max_length=2, choices=constants.COUNTRY_CODES.items())
     shopper_email = models.EmailField(blank=True)
-    shopper_reference = models.CharField(blank=True, max_length=80)
-    shopper_ip = models.CharField(blank=True, max_length=45)
-    shopper_statement = models.CharField(blank=True, max_length=135)
+    shopper_reference = models.CharField(max_length=80, blank=True)
+    shopper_ip = models.CharField(max_length=45, blank=True)
+    shopper_statement = models.CharField(max_length=135, blank=True)
     fraud_offset = models.PositiveIntegerField(null=True)
     recurring_contract = models.CharField(
-        blank=True,
         max_length=50,
-        choices=constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items()
+        choices=constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items(),
+        blank=True
     )
-    recurring_detail_reference = models.CharField(blank=True, max_length=80)
-    res_url = models.CharField(blank=True, max_length=2000, default=settings.DEFAULT_RES_URL)
+    recurring_detail_reference = models.CharField(max_length=80, blank=True)
+    res_url = models.CharField(max_length=2000, default=settings.DEFAULT_RES_URL, null=True, blank=True)
     page_type = models.CharField(
         max_length=15,
         choices=constants.PAGE_TYPES.items(),
@@ -207,11 +207,11 @@ class SessionBlockedPaymentMethods(models.Model):
 
 class RecurringContract(models.Model):
 
-    recurring_detail_reference = models.CharField(blank=True, max_length=150)
+    recurring_detail_reference = models.CharField(max_length=150, blank=True)
     shopper_reference = models.CharField(max_length=80)
     contract_type = models.CharField(max_length=50)
     payment_method_type = models.CharField(max_length=15)
-    variant = models.CharField(blank=True, max_length=50)
+    variant = models.CharField(max_length=50, blank=True)
     creation_date = models.DateTimeField(blank=True)
     creation_time = models.DateTimeField(auto_now_add=True)
 
@@ -234,10 +234,9 @@ class RecurringContract(models.Model):
 
 class RecurringContractDetail(models.Model):
 
-    recurring_contract = models.ForeignKey(
-        RecurringContract, related_name='details')
+    recurring_contract = models.ForeignKey(RecurringContract, related_name='details')
     key = models.CharField(max_length=100)
-    value = models.CharField(blank=True, max_length=250)
+    value = models.CharField(max_length=250, blank=True)
 
     def __str__(self):
         return self.key
@@ -253,6 +252,9 @@ class RecurringPaymentResult(models.Model):
 
     def is_authorized(self):
         return self.result_code == constants.RECURRING_PAYMENT_RESULT_AUTHORISED
+
+    def is_received(self):
+        return self.result_code == constants.RECURRING_PAYMENT_RESULT_RECEIVED
 
     def is_refused(self):
         return self.result_code == constants.RECURRING_PAYMENT_RESULT_REFUSED

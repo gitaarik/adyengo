@@ -1,0 +1,18 @@
+{% extends "adyengo/base.html" %}
+
+{% block content %}
+
+    <h2>Disable recurring contract</h2>
+
+    <h3>Result:</h3>
+
+    <p>
+        {% if success %}
+            disabled successfully
+        {% else %}
+            failed to disable contract
+        {% endif %}
+    </p>
+
+{% endblock %}
+
