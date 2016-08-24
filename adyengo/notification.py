@@ -37,20 +37,22 @@ def parse_notification(request):
         # Adyen notificatins are likely to be sent twice, hence we use
         # `get_or_create()`.
         return Notification.objects.get_or_create(
-            ip_address=client_ip,
             live=data.get('live'),
             event_code=item.get('eventCode'),
             psp_reference=item.get('pspReference'),
-            original_reference=item.get('originalReference'),
-            merchant_reference=item.get('merchantReference'),
             merchant_account_code=item.get('merchantAccountCode'),
-            event_date=get_event_date(),
             success=item.get('success'),
-            payment_method=item.get('paymentMethod'),
-            operations=','.join(item.get('operations', [])),
-            reason=item.get('reason'),
-            payment_amount=amount.get('value'),
-            currency_code=amount.get('currency')
+            defaults={
+                'ip_address': client_ip,
+                'original_reference': item.get('originalReference'),
+                'merchant_reference': item.get('merchantReference'),
+                'event_date': get_event_date(),
+                'payment_method': item.get('paymentMethod'),
+                'operations': ','.join(item.get('operations', [])),
+                'reason': item.get('reason'),
+                'payment_amount': amount.get('value'),
+                'currency_code': amount.get('currency')
+            }
         )[0]  # `get_or_create()` returns `(obj, created)`, hence the `[0]`
 
     try:
