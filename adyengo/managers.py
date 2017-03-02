@@ -29,13 +29,10 @@ class RecurringContractManager(models.Manager):
         response = api.disable_recurring_details(shopper_reference, recurring_detail_reference)
 
         if response.get('response') == '[detail-successfully-disabled]':
-            try:
-                self.filter(
-                    shopper_reference=shopper_reference,
-                    recurring_detail_reference=recurring_detail_reference
-                ).delete()
-            except:
-                pass
+            self.filter(
+                shopper_reference=shopper_reference,
+                recurring_detail_reference=recurring_detail_reference
+            ).delete()
             return True
 
     def flush_cache(self, shopper_reference, contract_type):
@@ -46,13 +43,10 @@ class RecurringContractManager(models.Manager):
         find any contracts in the cache and will do a request to the Adyen API
         (and will refill the cache).
         """
-        try:
-            self.filter(
-                shopper_reference=shopper_reference,
-                contract_type=contract_type
-            ).delete()
-        except:
-            pass
+        self.filter(
+            shopper_reference=shopper_reference,
+            contract_type=contract_type
+        ).delete()
 
     def _fetch_contracts(self, shopper_reference, contract_type):
         """
