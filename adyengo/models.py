@@ -245,7 +245,7 @@ class RecurringContractDetail(models.Model):
 class RecurringPaymentResult(models.Model):
 
     session = models.ForeignKey(Session, related_name='recurring_payment_results')
-    psp_reference = models.PositiveIntegerField()
+    psp_reference = models.BigIntegerField()
     result_code = models.CharField(max_length=30, choices=constants.RECURRING_PAYMENT_RESULT_CODES.items())
     auth_code = models.PositiveIntegerField(null=True)
     refusal_reason = models.CharField(max_length=250, blank=True)
