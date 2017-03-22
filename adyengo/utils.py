@@ -31,7 +31,7 @@ def merchant_sig(params, clean_params=True):
         return {
             key: value
             for key, value in params.items()
-            if value is not None
+            if value
         }
 
     if clean_params:
