@@ -34,27 +34,41 @@ You can install Adyengo with pip:
 
 ### Settings
 
-To start out you should add some settings to your main `settings.py`.
+To start out you should add some settings to Django's settings file (by default
+in `myapp/settings.py`). All settings should be in a dict `ADYENGO`, for
+example:
+
+    ADYENGO = {
+        'A_SETTING': 'A value',
+        'ANOTHER_SETTING': 'Another value'
+    }
 
 #### Required settings
 
-* `ADYENGO_MERCHANT_ACCOUNT` - Your Adyen merchant account.
-* `ADYENGO_HMAC_KEY` - The HMAC key used to validate the communication with
+* `MERCHANT_ACCOUNT` - Your Adyen merchant account.
+* `HMAC_KEY` - The HMAC key used to validate the communication with
   Adyen.
-* `ADYENGO_MODE` - Use `test` to use the Adyen test environment or `live` to
+* `NOTIFICATION_HMAC_KEY` - The HMAC key used to validate notifications from
+  Adyen.
+* `MODE` - Use `test` to use the Adyen test environment or `live` to
   use the live environment. Default to `test`.
 
 #### Required for Recurring Payments
 
-* `ADYENGO_WEB_SERVICES_USERNAME` - The username for the Adyen Web Services SOAP API.
-* `ADYENGO_WEB_SERVICES_PASSWORD` - The password for the Adyen Web Services SOAP API.
-* `ADYENGO_WEB_SERVICES_PUBLIC_KEY` - The public key for the Adyen Web Services SOAP API.
+* `API_USERNAME` - The username for the Adyen API.
+* `API_PASSWORD` - The password for the Adyen API.
 
 #### Optional settings
 
-* `ADYENGO_DEFAULT_SKIN_CODE` - The default skin code. Can always be overwritten.
-* `ADYENGO_DEFAULT_CURRENCY_CODE` - The default currency code. Can always be
+* `DEFAULT_SKIN_CODE` - The default skin code. Can always be overwritten.
+* `DEFAULT_PAGE_TYPE` - The default page type for an Adyen HPP (Hosted Payment
+  Pages) payment.
+* `DEFAULT_CURRENCY_CODE` - The default currency code. Can always be
   overwritten.
+* `DEFAULT_SHOPPER_LOCALE` - The default shopper locale. If it's not set, the
+  system expects that the skin code will be provided when creating the session.
+* `DEFAULT_RES_URL` - The default URL the user gets redirected to after an
+  Adyen HPP (Hosted Payment Pages) payment.
 
 ### Usage
 
@@ -62,9 +76,9 @@ There are two ways to do a payment through Adyen. One is to forward the
 customer to the **Adyen Hosted Payment Pages (HPP)** and the other is to do a
 **Recurring Payment through Adyen's API**.
 
-Adyengo reflects Adyen's interface in regular Django models and managers.
-The main model to setup a payment is the `Session` model. Depending on what
-kind of payment, you fill the fields of the `Session` model.
+Adyengo reflects Adyen's interface in regular Django models and managers. The
+main model to setup a payment is the `Session` model. So you create a payment
+by creating an instance of the `Session` model.
 
 #### The `Session` model
 
@@ -87,8 +101,8 @@ import using `from adyengo import constants`. Then you can choose one of the
 following:
 
 * `constants.SESSION_TYPE_HPP_REGULAR` - For a regular payment.
-* `constants.SESSION_TYPE_HPP_RECURRING` - To setup a recurring contract,
-    or to do a "oneclick" recurring payment.
+* `constants.SESSION_TYPE_HPP_RECURRING` - To setup a recurring contract, or to
+  do a "oneclick" recurring payment.
 * `constants.SESSION_TYPE_API_RECURRING` - For a recurring payment.
 
 Now let's set up a Regular payment so you get a feeling of how it works.
@@ -103,21 +117,28 @@ fields:
 
 * `merchant_reference` - Unique id for the session.
 * `payment_amount` - Amount for the payment in cents.
+
+##### Optional fields
+
 * `currency_code` - The currency code for the currency the amount is in.
-    Choices are listed in the constants starting with `CURRENCY_CODE_`, for
-    example `CURRENCY_CODE_EUR` for Euro.
-* `ship_before_date` - The date the product should be shipped, provide as a
-    Python date object.
+  Choices are listed in the constants starting with `CURRENCY_CODE_`, for
+  example `CURRENCY_CODE_EUR` for Euro. Only required if you didn't set
+  `DEFAULT_CURRENCY_CODE`.
 * `skin_code` - The skin code. If you set a default skin code using the
-    `DEFAULT_SKIN_CODE` settings, you can exclude this field. If you provide it
-    anyway, it will overwrite the default skin code.
+  `DEFAULT_SKIN_CODE` settings, you can exclude this field. If you provide it
+  anyway, it will overwrite the default skin code.
+* `ship_before_date` - The date the product should be shipped, provide as a
+  Python date object. This defaults to 24 hours from now, which is a good
+  default for online services. 
 * `session_validity` - The date the session expires, provide as a Python date
-    object.
-
-Optional Adyen specific fields:
-
+  object.
 * `shopper_reference` - Unique id for the customer.
 * `shopper_email` - The customer's email address.
+
+See the [Adyen documentation](https://docs.adyen.com/developers/hpp-manual#hpppaymentfields)
+for more information about the fields.
+
+##### Adyengo fields
 
 There's one Adyengo specific field you should provide, `page_type`. This field
 decides to what kind of page the user gets forwarded. The choices are defined
@@ -137,10 +158,10 @@ Admin.
 
 ##### Params
 
-To forward the user to adyen, you should have the session set up and put the
+To forward the user to Adyen, you should have the session set up and put the
 parameters in hidden form fields on the page you want to forward the user. You 
 can then either have the user forward himself by clicking a submit button, or
-automatically forward the user by submitting the form with javascript.
+automatically forward the user by submitting the form with JavaScript.
 
 To get the parameters for the form, use the `params()` method on the `Session`
 model. To get the url the form should post to, use the `url()` method.
@@ -156,14 +177,11 @@ model. To get the url the form should post to, use the `url()` method.
 
     def forward_to_adyen(request):
 
-        tomorrow = (timezone.now() + timezone.timedelta(days=1))
-
         s = Session(
             session_type=constants.SESSION_TYPE_HPP_REGULAR,
             merchant_reference=51391,
             payment_amount=1000,
             currency_code=constants.CURRENCY_CODE_EUR,
-            ship_before_date=tomorrow,
             skin_code='Nl0r8s5C',
             session_validity=tomorrow,
             shopper_reference=13154,
@@ -182,21 +200,22 @@ model. To get the url the form should post to, use the `url()` method.
 
 **forward.html**
 
-    <form method="POST" action="{{ url }}">
+    <form id="adyengo-form" method="POST" action="{{ url }}">
         {% for var, value in params.items %}
             <input type="hidden" name="{{ var }}" value="{{ value }}" />
         {% endfor %}
     </form>
 
     <script>
-        document.forms[0].submit() // automatically submit the form
+        // automatically submit the form
+        document.getElementById('adyengo-form').submit()
     </script>
 
 
 #### Oneclick Recurring Payment
 
 This readme isn't finished yet. The code however is usable, so don't hesitate
-to try it out.
+to try it out, and update the readme!
 
 ### Adyengo Test pages
 
