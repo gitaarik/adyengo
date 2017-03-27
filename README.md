@@ -209,7 +209,7 @@ kind of requests to Adyen. You can enable them by adding them to your main
 
     urlpatterns = [
         # Here your regular urlpatterns
-    )
+    ]
 
     if settings.DEBUG:
         urlpatterns += [
