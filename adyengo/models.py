@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from .managers import RecurringContractManager
-from .utils import merchant_sig
+from .utils import remove_items_with_empty_values, merchant_sig
 from . import settings, constants, api
 
 
@@ -95,22 +95,19 @@ class Session(models.Model):
             'shopperReference': self.shopper_reference,
             'recurringContract': self.recurring_contract,
             'selectedRecurringDetailReference': self.recurring_detail_reference,
-            'resURL': self.res_url
-        }
-
-        if self.allowed_payment_methods.count():
-            params['allowedMethods'] = ','.join([
+            'resURL': self.res_url,
+            'allowedMethods': ','.join([
                 m.method for m in self.allowed_payment_methods.all()
-            ])
-
-        if self.blocked_payment_methods.count():
-            params['blockedMethods'] = ','.join([
+            ]),
+            'blockedMethods': ','.join([
                 m.method for m in self.blocked_payment_methods.all()
             ])
+        }
 
         if self.page_type == constants.PAGE_TYPE_SKIP:
             params['brandCode'] = params['allowedMethods']
 
+        params = remove_items_with_empty_values(params)
         params['merchantSig'] = merchant_sig(params)
 
         return params

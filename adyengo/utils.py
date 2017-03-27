@@ -7,6 +7,14 @@ from collections import OrderedDict
 from . import settings, constants
 
 
+def remove_items_with_empty_values(params):
+    return {
+        key: value
+        for key, value in params.items()
+        if value
+    }
+
+
 def merchant_sig(params, clean_params=True):
 
     def clean_params(params):
@@ -27,17 +35,10 @@ def merchant_sig(params, clean_params=True):
             if key in valid_params
         }
 
-    def remove_empty_values(params):
-        return {
-            key: value
-            for key, value in params.items()
-            if value is not None
-        }
-
     if clean_params:
         params = clean_params(params)
 
-    params = OrderedDict(sorted(remove_empty_values(params).items()))
+    params = OrderedDict(sorted(params.items()))
 
     return calc_hmac(
         ':'.join(
