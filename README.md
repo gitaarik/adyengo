@@ -171,9 +171,9 @@ model. To get the url the form should post to, use the `url()` method.
 **view.py**
 
     from django.shortcuts import render
+    from django.utils import timezone
     from adyengo.models import Session
     from adyengo import constants
-    from django.utils import timezone
 
     def forward_to_adyen(request):
 
