@@ -91,6 +91,8 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
+    if isinstance(ip, bytes):
+        return ip.decode('utf-8')
     return ip
 
 
