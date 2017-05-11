@@ -48,7 +48,19 @@ def merchant_sig(params, clean_params=True):
     )
 
 
+def is_string(var):
+    try:
+        return isinstance(var, basestring)
+    except NameError:
+        return isinstance(var, str)
+
+
 def calc_hmac(string, hmac_key=settings.HMAC_KEY):
+
+    assert is_string(hmac_key), (
+        "Got invalid hmac_key, did you set the `HMAC_KEY` in the Adyengo settings dict?"
+    )
+
     return base64.encodestring(hmac.new(
         binascii.a2b_hex(hmac_key.encode()),
         string.encode(),
