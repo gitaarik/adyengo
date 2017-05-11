@@ -7,6 +7,13 @@ from collections import OrderedDict
 from . import settings, constants
 
 
+def is_string(var):
+    try:
+        return isinstance(var, basestring)
+    except NameError:
+        return isinstance(var, str)
+
+
 def remove_items_with_empty_values(params):
     return {
         key: value
@@ -40,26 +47,20 @@ def merchant_sig(params, clean_params=True):
 
     params = OrderedDict(sorted(params.items()))
 
+    assert is_string(settings.HMAC_KEY), (
+        "Invalid `HMAC_KEY`, did you set the `HMAC_KEY` in the Adyengo settings dict?"
+    )
+
     return calc_hmac(
         ':'.join(
             list(params.keys()) +
             escape_values(params.values())
-        )
+        ),
+        settings.HMAC_KEY
     )
 
 
-def is_string(var):
-    try:
-        return isinstance(var, basestring)
-    except NameError:
-        return isinstance(var, str)
-
-
-def calc_hmac(string, hmac_key=settings.HMAC_KEY):
-
-    assert is_string(hmac_key), (
-        "Got invalid hmac_key, did you set the `HMAC_KEY` in the Adyengo settings dict?"
-    )
+def calc_hmac(string, hmac_key):
 
     return base64.encodestring(hmac.new(
         binascii.a2b_hex(hmac_key.encode()),
@@ -89,6 +90,11 @@ def is_notification_item_hmac_valid(item):
     )
 
     hmac_signature = item.get('additionalData', {}).get('hmacSignature')
+
+    assert is_string(settings.NOTIFICATION_HMAC_KEY), (
+        "Invalid `NOTIFICATION_HMAC_KEY`, did you set the "
+        "`NOTIFICATION_HMAC_KEY` in the Adyengo settings dict?"
+    )
 
     if hmac_signature and hmac_signature == calc_hmac(
         ':'.join(escape_values(hmac_values)),
