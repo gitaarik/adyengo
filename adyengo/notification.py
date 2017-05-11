@@ -28,6 +28,15 @@ def parse_notification(request):
         if not is_notification_item_hmac_valid(item):
             raise HmacCalcInvalid()
 
+        def adyen_bool(var):
+            """
+            Because Adyen likes to send strings where you expect bools..
+            """
+            if type(var) == bool:
+                return var
+            else:
+                return var.lower() == 'true'
+
         def get_event_date():
             if item.get('eventDate'):
                 return dateutil.parser.parse(item.get('eventDate'))
@@ -37,11 +46,11 @@ def parse_notification(request):
         # Adyen notificatins are likely to be sent twice, hence we use
         # `get_or_create()`.
         return Notification.objects.get_or_create(
-            live=data.get('live'),
+            live=adyen_bool(data.get('live')),
             event_code=item.get('eventCode'),
             psp_reference=item.get('pspReference'),
             merchant_account_code=item.get('merchantAccountCode'),
-            success=item.get('success'),
+            success=adyen_bool(item.get('success')),
             defaults={
                 'ip_address': client_ip,
                 'original_reference': item.get('originalReference'),
