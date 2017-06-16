@@ -27,7 +27,7 @@ If you want to contribute, you're very welcome. Contact me for any questions.
 
 You can install Adyengo with pip:
 
-    pip install git+git://github.com/gitaarik/adyengo.git
+    pip install adyengo
 
 
 ## Implementation
