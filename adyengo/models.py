@@ -12,26 +12,26 @@ def tomorrow():
 
 class Session(models.Model):
 
-    session_type = models.CharField(max_length=25, choices=constants.SESSION_TYPES.items())
+    session_type = models.CharField(max_length=25, choices=sorted(constants.SESSION_TYPES.items()))
     merchant_reference = models.CharField(max_length=80, unique=True)
     payment_amount = models.PositiveSmallIntegerField()
     currency_code = models.CharField(
         max_length=3,
-        choices=constants.CURRENCY_CODES.items(),
+        choices=sorted(constants.CURRENCY_CODES.items()),
         default=settings.DEFAULT_CURRENCY_CODE
     )
     ship_before_date = models.DateTimeField(default=tomorrow, null=True)
     skin_code = models.CharField(max_length=10, default=settings.DEFAULT_SKIN_CODE)
     shopper_locale = models.CharField(
         max_length=5,
-        choices=constants.LOCALES.items(),
+        choices=sorted(constants.LOCALES.items()),
         default=settings.DEFAULT_SHOPPER_LOCALE,
         blank=True
     )
     order_data = models.TextField(blank=True)
     session_validity = models.DateTimeField(default=tomorrow, null=True)
     merchant_return_data = models.CharField(max_length=128)
-    country_code = models.CharField(max_length=2, choices=constants.COUNTRY_CODES.items())
+    country_code = models.CharField(max_length=2, choices=sorted(constants.COUNTRY_CODES.items()))
     shopper_email = models.EmailField(blank=True)
     shopper_reference = models.CharField(max_length=80, blank=True)
     shopper_ip = models.CharField(max_length=45, blank=True)
@@ -39,14 +39,14 @@ class Session(models.Model):
     fraud_offset = models.PositiveIntegerField(null=True)
     recurring_contract = models.CharField(
         max_length=50,
-        choices=constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items(),
+        choices=sorted(constants.RECURRING_CONTRACT_TYPES_PLUS_COMBOS.items()),
         blank=True
     )
     recurring_detail_reference = models.CharField(max_length=80, blank=True)
     res_url = models.CharField(max_length=2000, default=settings.DEFAULT_RES_URL, null=True, blank=True)
     page_type = models.CharField(
         max_length=15,
-        choices=constants.PAGE_TYPES.items(),
+        choices=sorted(constants.PAGE_TYPES.items()),
         default=settings.DEFAULT_PAGE_TYPE
     )
     creation_time = models.DateTimeField(auto_now_add=True)
@@ -187,7 +187,7 @@ class Session(models.Model):
 class SessionAllowedPaymentMethods(models.Model):
 
     session = models.ForeignKey(Session, related_name='allowed_payment_methods')
-    method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
+    method = models.CharField(max_length=50, choices=sorted(constants.PAYMENT_METHODS.items()))
 
     def __str__(self):
         return self.method
@@ -196,7 +196,7 @@ class SessionAllowedPaymentMethods(models.Model):
 class SessionBlockedPaymentMethods(models.Model):
 
     session = models.ForeignKey(Session, related_name='blocked_payment_methods')
-    method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items())
+    method = models.CharField(max_length=50, choices=sorted(constants.PAYMENT_METHODS.items()))
 
     def __str__(self):
         return self.method
@@ -243,7 +243,7 @@ class RecurringPaymentResult(models.Model):
 
     session = models.ForeignKey(Session, related_name='recurring_payment_results')
     psp_reference = models.BigIntegerField()
-    result_code = models.CharField(max_length=30, choices=constants.RECURRING_PAYMENT_RESULT_CODES.items())
+    result_code = models.CharField(max_length=30, choices=sorted(constants.RECURRING_PAYMENT_RESULT_CODES.items()))
     auth_code = models.PositiveIntegerField(null=True)
     refusal_reason = models.CharField(max_length=250, blank=True)
 
@@ -271,13 +271,18 @@ class Notification(models.Model):
     merchant_account_code = models.CharField(max_length=150, null=True, blank=True)
     event_date = models.DateTimeField(null=True, blank=True)
     success = models.BooleanField()
-    payment_method = models.CharField(max_length=50, choices=constants.PAYMENT_METHODS.items(), null=True, blank=True)
+    payment_method = models.CharField(
+        max_length=50,
+        choices=sorted(constants.PAYMENT_METHODS.items()),
+        null=True,
+        blank=True
+    )
     operations = models.CharField(max_length=100, null=True, blank=True)
     reason = models.CharField(max_length=250, null=True, blank=True)
     payment_amount = models.PositiveSmallIntegerField()
     currency_code = models.CharField(
         max_length=3,
-        choices=constants.CURRENCY_CODES.items(),
+        choices=sorted(constants.CURRENCY_CODES.items()),
         default=settings.DEFAULT_CURRENCY_CODE
     )
     session = models.ForeignKey(Session, null=True, blank=True)
