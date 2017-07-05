@@ -1,8 +1,20 @@
 import json
 import dateutil.parser
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse
 from .models import Notification
 from .utils import is_valid_ip, get_client_ip, is_notification_item_hmac_valid
+
+
+class InvalidNotification(Exception):
+    pass
+
+
+class InvalidIp(InvalidNotification):
+    pass
+
+
+class HmacCalcInvalid(InvalidNotification):
+    pass
 
 
 def parse_notification(request):
@@ -10,12 +22,9 @@ def parse_notification(request):
     client_ip = get_client_ip(request)
 
     if not is_valid_ip(client_ip):
-        return False
+        raise InvalidIp('Invalid IP')
 
     data = json.loads(request.body.decode())
-
-    class HmacCalcInvalid(Exception):
-        pass
 
     def get_notification_items(data):
         return [
@@ -26,7 +35,7 @@ def parse_notification(request):
     def save_notification_item(item):
 
         if not is_notification_item_hmac_valid(item):
-            raise HmacCalcInvalid()
+            raise HmacCalcInvalid('HMAC calculation invalid')
 
         def adyen_bool(var):
             """
@@ -64,20 +73,19 @@ def parse_notification(request):
             }
         )[0]  # `get_or_create()` returns `(obj, created)`, hence the `[0]`
 
-    try:
-        return [
-            save_notification_item(item)
-            for item in get_notification_items(
-                json.loads(request.body.decode())
-            )
-        ]
-    except HmacCalcInvalid:
-        return False
+    return [
+        save_notification_item(item)
+        for item in get_notification_items(
+            json.loads(request.body.decode())
+        )
+    ]
 
 
 def notification_valid_response():
     return JsonResponse({'notificationResponse': '[accepted]'})
 
 
-def notification_invalid_response():
-    return HttpResponseForbidden()
+def notification_invalid_response(error_message='Invalid Notification'):
+    response = JsonResponse({'notificationResponse': error_message})
+    response.status_code = 403
+    return response

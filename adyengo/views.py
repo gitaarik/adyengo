@@ -192,7 +192,9 @@ def api_execute_recurring_session(request):
 
 @csrf_exempt
 def parse_notification(request):
-    if notification.parse_notification(request):
-        return notification.notification_valid_response()
+    try:
+        notification.parse_notification(request)
+    except notification.InvalidNotification as error:
+        return notification.notification_invalid_response(str(error))
     else:
-        return notification.notification_invalid_response()
+        return notification.notification_valid_response()
