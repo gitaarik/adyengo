@@ -155,11 +155,17 @@ class Session(models.Model):
 
         r = RecurringPaymentResult(
             session=self,
-            psp_reference=response.get('pspReference'),
-            result_code=response.get('resultCode'),
-            auth_code=response.get('authCode'),
-            refusal_reason=response.get('refusalReason', '')
+            psp_reference=response.get('pspReference')
         )
+
+        if response.get('errorCode'):
+            r.result_code = constants.RECURRING_PAYMENT_RESULT_ERROR
+            r.refusal_reason = response.get('message')
+        else:
+            r.result_code = response.get('resultCode')
+            r.auth_code = response.get('authCode')
+            r.refusal_reason = response.get('refusalReason', '')
+
         r.save()
 
         return r
