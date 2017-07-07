@@ -1,4 +1,5 @@
 import json
+import textwrap
 import requests
 from . import settings
 
@@ -70,10 +71,27 @@ def recurring_api_request(endpoint, data):
     )
 
 
+class APIResponseInvalidJson(Exception):
+    pass
+
+
 def api_request(url, data):
-    return requests.post(
+
+    response = requests.post(
         url,
         headers={'Content-Type': 'application/json'},
         auth=(settings.API_USERNAME, settings.API_PASSWORD),
         data=json.dumps(data)
-    ).json()
+    )
+
+    try:
+        return response.json()
+    except json.JSONDecodeError:
+        raise APIResponseInvalidJson(
+            "The response from the Adyen API was invalid JSON:\n"
+            "  Status code: {}\n"
+            "  Body: {}".format(
+                response.status_code,
+                textwrap.shorten(response.text, width=75)
+            )
+        )
