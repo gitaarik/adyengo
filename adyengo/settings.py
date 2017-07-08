@@ -52,4 +52,4 @@ if MODE == 'live':
     PAYMENT_PAGES_SINGLE_URL = 'https://live.adyen.com/hpp/pay.shtml'
     PAYMENT_PAGES_SKIP_URL = 'https://live.adyen.com/hpp/details.shtml'
     PAYMENT_API_BASE_URL = 'https://pal-live.adyen.com/pal/servlet/Payment/v12/'
-    RECURRING_API_BASE_URL = 'https://pal-test.adyen.com/pal/servlet/Recurring/v12/'
+    RECURRING_API_BASE_URL = 'https://pal-live.adyen.com/pal/servlet/Recurring/v12/'
