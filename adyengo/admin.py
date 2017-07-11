@@ -35,6 +35,8 @@ class SessionAdmin(admin.ModelAdmin):
         'recurring_contract', 'creation_time'
     ]
 
+    readonly_fields = ['creation_time']
+
     inlines = [
         SessionAllowedPaymentMethodsInline,
         SessionBlockedPaymentMethodsInline,
