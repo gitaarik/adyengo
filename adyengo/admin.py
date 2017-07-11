@@ -53,7 +53,7 @@ class NotificationAdmin(admin.ModelAdmin):
         'creation_time'
     ]
     raw_id_fields = ['session']
-    readonly_fields = ['session_link']
+    readonly_fields = ['creation_time', 'session_link']
 
     def session_link(self, instance):
 
@@ -81,6 +81,7 @@ class RecurringContractAdmin(admin.ModelAdmin):
         'recurring_detail_reference', 'shopper_reference', 'contract_type',
         'payment_method_type', 'variant', 'creation_date'
     ]
+    readonly_fields = ['creation_time']
     inlines = (RecurringContractDetailInline,)
 
 
