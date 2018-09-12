@@ -14,7 +14,7 @@ class Session(models.Model):
 
     session_type = models.CharField(max_length=25, choices=sorted(constants.SESSION_TYPES.items()))
     merchant_reference = models.CharField(max_length=80, unique=True)
-    payment_amount = models.PositiveSmallIntegerField()
+    payment_amount = models.PositiveIntegerField()
     currency_code = models.CharField(
         max_length=3,
         choices=sorted(constants.CURRENCY_CODES.items()),
@@ -285,7 +285,7 @@ class Notification(models.Model):
     )
     operations = models.CharField(max_length=100, null=True, blank=True)
     reason = models.CharField(max_length=250, null=True, blank=True)
-    payment_amount = models.PositiveSmallIntegerField()
+    payment_amount = models.PositiveIntegerField()
     currency_code = models.CharField(
         max_length=3,
         choices=sorted(constants.CURRENCY_CODES.items()),
@@ -306,7 +306,7 @@ class Notification(models.Model):
             self.session = Session.objects.get(
                 merchant_reference=self.merchant_reference
             )
-        except:
+        except Exception:
             pass
 
         super(Notification, self).save(*args, **kwargs)
