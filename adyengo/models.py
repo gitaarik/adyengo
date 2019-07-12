@@ -192,7 +192,7 @@ class Session(models.Model):
 
 class SessionAllowedPaymentMethods(models.Model):
 
-    session = models.ForeignKey(Session, related_name='allowed_payment_methods')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='allowed_payment_methods')
     method = models.CharField(max_length=50, choices=sorted(constants.PAYMENT_METHODS.items()))
 
     def __str__(self):
@@ -201,7 +201,7 @@ class SessionAllowedPaymentMethods(models.Model):
 
 class SessionBlockedPaymentMethods(models.Model):
 
-    session = models.ForeignKey(Session, related_name='blocked_payment_methods')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='blocked_payment_methods')
     method = models.CharField(max_length=50, choices=sorted(constants.PAYMENT_METHODS.items()))
 
     def __str__(self):
@@ -247,7 +247,7 @@ class RecurringContractDetail(models.Model):
 
 class RecurringPaymentResult(models.Model):
 
-    session = models.ForeignKey(Session, related_name='recurring_payment_results')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='recurring_payment_results')
     psp_reference = models.BigIntegerField()
     result_code = models.CharField(max_length=30, choices=sorted(constants.RECURRING_PAYMENT_RESULT_CODES.items()))
     auth_code = models.PositiveIntegerField(null=True)
@@ -291,7 +291,7 @@ class Notification(models.Model):
         choices=sorted(constants.CURRENCY_CODES.items()),
         default=settings.DEFAULT_CURRENCY_CODE
     )
-    session = models.ForeignKey(Session, null=True, blank=True)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, null=True, blank=True)
     creation_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
