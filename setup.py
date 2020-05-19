@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name='adyengo',
     keywords='django adyen payment integration',
-    version='0.0.9',
+    version='0.0.10',
     author='gitaarik',
     author_email='gitaarik@gmail.com',
     description='Django app for easy Adyen integration.',
