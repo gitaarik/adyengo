@@ -1,3 +1,5 @@
+### Note: This project uses the old HPP (Hosted Payment Pages) integration of Adyen, which is not anymore supported.
+
 # Adyengo
 
 This is an Adyen app for Django. It provides an easy way to integrate the Adyen
